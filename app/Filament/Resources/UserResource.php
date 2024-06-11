@@ -17,7 +17,13 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-user-group';
+
+    protected static ?string $navigationLabel = 'Usuarios'; // Cambiar el texto en el menú de navegación
+
+    protected static ?string $pluralModelLabel = 'Usuarios';
+
+    protected static ?string $modelLabel = 'Usuario';
 
     public static function form(Form $form): Form
     {
@@ -25,15 +31,17 @@ class UserResource extends Resource
             ->schema([
                 Forms\Components\TextInput::make('name')
                     ->required()
+                    ->label('Nombre')
                     ->maxLength(191),
                 Forms\Components\TextInput::make('email')
                     ->email()
                     ->required()
+                    ->label('Email')
                     ->maxLength(191),
-                Forms\Components\DateTimePicker::make('email_verified_at'),
                 Forms\Components\TextInput::make('password')
                     ->password()
                     ->required()
+                    ->label('Contraseña')
                     ->maxLength(191),
             ]);
     }
@@ -43,17 +51,13 @@ class UserResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
+                    ->label('Nombre')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')
+                    ->label('Email')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('email_verified_at')
-                    ->dateTime()
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                    ->label('Creado')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

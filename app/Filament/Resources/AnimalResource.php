@@ -13,6 +13,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\BulkAction;
 
 
 class AnimalResource extends Resource
@@ -144,7 +145,15 @@ class AnimalResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                Tables\Actions\DeleteBulkAction::make(),
+                BulkAction::make('assignToFolder')
+                ->label('Asignar a Carpeta')
+                ->icon('heroicon-o-arrow-up-on-square-stack')
+                ->action(function (Animal $record) {
+                    // Lógica de la acción personalizada
+                    // Puedes hacer cualquier cosa aquí, por ejemplo, redirigir a una página diferente
+                    return false;
+                }),
                 ]),
             ]);
     }

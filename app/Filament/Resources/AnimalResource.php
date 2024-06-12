@@ -96,20 +96,37 @@ class AnimalResource extends Resource
                     ->searchable()
                     ->label('G.D'),
                 Tables\Columns\TextColumn::make('AoB')
-                ->sortable()
-
+                    ->sortable()
                     ->searchable()
                     ->label('AoB'),
                 Tables\Columns\TextColumn::make('AoBType')
-                ->sortable()
-
+                    ->sortable()
                     ->searchable()
                     ->label('Tipo AoB'),
                 Tables\Columns\TextColumn::make('case')
-                ->sortable()
-
+                    ->sortable()
                     ->searchable()
                     ->label('Carcasa'),
+                Tables\Columns\TextColumn::make('im')
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->sortable()
+                    ->searchable()
+                    ->label('I.M'),
+                Tables\Columns\TextColumn::make('aobe')
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->sortable()
+                    ->searchable()
+                    ->label('AOBE'),
+                Tables\Columns\TextColumn::make('yg')
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->sortable()
+                    ->searchable()
+                    ->label('Yield Grade'),
+                Tables\Columns\TextColumn::make('rc')
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->sortable()
+                    ->searchable()
+                    ->label('% R.C'),
             ])
             ->filters([
                 //

@@ -38,6 +38,8 @@ class FolderResource extends Resource
                 Forms\Components\Select::make('userId')
                 ->options(User::all()->pluck('name', 'id')->toArray())
                 ->label('Usuario')
+                ->searchable()
+                ->preload()
                 ->required(),
                 Forms\Components\DatePicker::make('date')
                 ->required()

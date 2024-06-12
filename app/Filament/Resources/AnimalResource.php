@@ -44,6 +44,7 @@ class AnimalResource extends Resource
                     ->required()
                     ->maxLength(191),
                     Forms\Components\TextInput::make('weight')
+                    ->sortable()
                     ->label('Peso')
                     ->required()
                     ->maxLength(191),
@@ -77,13 +78,38 @@ class AnimalResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('category')->label('Categoria'),
-                Tables\Columns\TextColumn::make('rfid')->label('RFID'),
-                Tables\Columns\TextColumn::make('weight')->label('Peso'),
-                Tables\Columns\TextColumn::make('gd')->label('G.D'),
-                Tables\Columns\TextColumn::make('AoB')->label('AoB'),
-                Tables\Columns\TextColumn::make('AoBType')->label('Tipo AoB'),
-                Tables\Columns\TextColumn::make('case')->label('Carcasa'),
+                Tables\Columns\TextColumn::make('category')
+                ->sortable()
+
+                    ->searchable()
+                    ->label('Categoria'),
+                Tables\Columns\TextColumn::make('rfid')
+                ->sortable()
+
+                    ->searchable()
+                    ->label('RFID'),
+                Tables\Columns\TextColumn::make('weight')
+                    ->sortable()
+                    ->searchable()
+                    ->label('Peso'),
+                Tables\Columns\TextColumn::make('gd')
+                    ->searchable()
+                    ->label('G.D'),
+                Tables\Columns\TextColumn::make('AoB')
+                ->sortable()
+
+                    ->searchable()
+                    ->label('AoB'),
+                Tables\Columns\TextColumn::make('AoBType')
+                ->sortable()
+
+                    ->searchable()
+                    ->label('Tipo AoB'),
+                Tables\Columns\TextColumn::make('case')
+                ->sortable()
+
+                    ->searchable()
+                    ->label('Carcasa'),
             ])
             ->filters([
                 //

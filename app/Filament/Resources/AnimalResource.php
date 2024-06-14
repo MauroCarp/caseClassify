@@ -12,8 +12,11 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Columns\ImageColumn;
 
 
 class AnimalResource extends Resource
@@ -45,7 +48,6 @@ class AnimalResource extends Resource
                     ->required()
                     ->maxLength(191),
                     Forms\Components\TextInput::make('weight')
-                    ->sortable()
                     ->label('Peso')
                     ->required()
                     ->maxLength(191),
@@ -57,20 +59,17 @@ class AnimalResource extends Resource
                     ->label('AoB')
                     ->required()
                     ->maxLength(191),
-                
-                Forms\Components\Radio::make('AoBType')
-                    ->label('AoB Tipo')
-                    ->options([
-                        'Dorsal' => 'Dorsal',
-                        'Delantera' => 'Delantera',
-                    ])
-                    ->default('dorsal') // Establecer 'dorsal' como seleccionado por defecto
-                    ->inline()
-                    ->required(),
-                Forms\Components\TextInput::make('case')
-                    ->label('Carcasa')
+                Forms\Components\TextInput::make('gim')
+                    ->label('% GIM')
                     ->required()
                     ->maxLength(191),
+                    FileUpload::make('images')
+                    ->label('Ecografias')
+                    ->multiple()
+                    ->image()
+                    ->directory('uploads/animals')
+                    ->visibility('public')
+
 
             ]);
     }
@@ -128,6 +127,11 @@ class AnimalResource extends Resource
                     ->sortable()
                     ->searchable()
                     ->label('% R.C'),
+                ImageColumn::make('images')
+                    ->label('Ecografias')
+                    ->getStateUsing(function ($record) {
+                        return $record->getFirstMediaUrl('images');
+                    }),
             ])
             ->filters([
                 //

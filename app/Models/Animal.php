@@ -15,11 +15,13 @@ class Animal extends Model implements HasMedia
     use HasFactory, InteractsWithMedia;
     protected $guarded = [];
 
+    protected $casts = [
+        'images' => 'array',
+    ];
+
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('images')
-            ->useFallbackUrl('/path/to/default-image.jpg')
-            ->useFallbackPath(public_path('/path/to/default-image.jpg'));
+        $this->addMediaCollection('images');
     }
 
     public function registerMediaConversions(?Media $media = null): void

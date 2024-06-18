@@ -63,14 +63,12 @@ class AnimalResource extends Resource
                     ->label('% GIM')
                     ->required()
                     ->maxLength(191),
-                    FileUpload::make('images')
+                FileUpload::make('images')
                     ->label('Ecografias')
                     ->multiple()
                     ->image()
                     ->directory('uploads/animals')
                     ->visibility('public')
-
-
             ]);
     }
 
@@ -127,11 +125,6 @@ class AnimalResource extends Resource
                     ->sortable()
                     ->searchable()
                     ->label('% R.C'),
-                ImageColumn::make('images')
-                    ->label('Ecografias')
-                    ->getStateUsing(function ($record) {
-                        return $record->getFirstMediaUrl('images');
-                    }),
             ])
             ->filters([
                 //

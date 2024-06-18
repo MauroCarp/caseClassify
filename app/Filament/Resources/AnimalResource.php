@@ -74,16 +74,17 @@ class AnimalResource extends Resource
 
     public static function table(Table $table): Table
     {
+
+        $engMeasures = array('libras'=>2.204,'inch'=>0.0393,'inch2'=>0.155,'kph%'=>3.3);
+
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('category')
-                ->sortable()
-
+                    ->sortable()
                     ->searchable()
                     ->label('Categoria'),
                 Tables\Columns\TextColumn::make('rfid')
-                ->sortable()
-
+                    ->sortable()
                     ->searchable()
                     ->label('RFID'),
                 Tables\Columns\TextColumn::make('weight')
@@ -97,48 +98,80 @@ class AnimalResource extends Resource
                     ->sortable()
                     ->searchable()
                     ->label('AoB'),
-                Tables\Columns\TextColumn::make('AoBType')
-                    ->sortable()
-                    ->searchable()
-                    ->label('Tipo AoB'),
                 Tables\Columns\TextColumn::make('case')
                     ->sortable()
                     ->searchable()
-                    ->label('Carcasa'),
+                    ->label('Carcasa')
+                    ->getStateUsing(function ($record) {
+
+                        $case = $record->weight * 0.59; 
+                        return number_format($case, 0);
+
+                    }),
                 Tables\Columns\TextColumn::make('im')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable()
                     ->searchable()
-                    ->label('I.M'),
-                Tables\Columns\TextColumn::make('aobe')
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->sortable()
-                    ->searchable()
-                    ->label('AOBE'),
+                    ->label('I.M')
+                    ->getStateUsing(function ($record) {
+
+                        $indiceMuscularidad = ($record->AoB / $record->weight) * 100; 
+                        return number_format($indiceMuscularidad, 0);
+
+                    }),
                 Tables\Columns\TextColumn::make('yg')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable()
                     ->searchable()
-                    ->label('Yield Grade'),
+                    ->label('Yield Grade')
+                    ->getStateUsing(function ($record) use ($engMeasures) {
+
+                        $case = $record->weight * 0.59; 
+
+                        $n1 = $record->gd * $engMeasures['inch'];
+                        $n2 = $engMeasures['kph%'];
+                        $n3 = $case * $engMeasures['libras'];
+                        $n4 = $record->AoB * $engMeasures['inch2'];
+            
+                        $yieldGrade = 2.5+(2.5*$n1)+(0.2*$n2)+(0.0038*$n3)-(0.32*$n4); 
+
+                        return number_format($yieldGrade, 1);
+
+                    }),
                 Tables\Columns\TextColumn::make('rc')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable()
                     ->searchable()
-                    ->label('% R.C'),
+                    ->label('% R.C')
+                    ->getStateUsing(function ($record) use ($engMeasures) {
+
+                        $case = $record->weight * 0.59; 
+
+                        $n1 = $record->gd * $engMeasures['inch'];
+                        $n2 = $engMeasures['kph%'];
+                        $n3 = $case * $engMeasures['libras'];
+                        $n4 = $record->AoB * $engMeasures['inch2'];
+
+                        $rc = 65.59-(9.93*$n1)-(1.29*$n2)+(1.23*$n4)-(0.013*$n3); 
+
+                        return number_format($rc, 2);
+
+                    }),
             ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Action::make('showEcos')
-                ->label('Ecografias')
-                ->icon('heroicon-o-photo')
+                Action::make('showMore')
+                ->label('Ver Más')
+                ->icon('heroicon-o-eye')
                 ->action(function (Animal $record) {
                     // Lógica de la acción personalizada
                     // Puedes hacer cualquier cosa aquí, por ejemplo, redirigir a una página diferente
                     return false;
                 }),
+                Tables\Actions\EditAction::make(),
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

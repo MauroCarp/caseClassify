@@ -32,5 +32,44 @@ class Animal extends Model implements HasMedia
               ->sharpen(10);
     }
 
+    public function getImagePathAttribute()
+    {
+        $gim = $this->gim;
+        switch ($gim) {
+            case $gim > 6.5:
+                $name = 'abundante';
+                break;
+            case ($gim > 5 && $gim <= 6.5):
+                $name = 'moderado';
+                break;
+            
+            case ($gim > 4 && $gim <= 5):
+                $name = 'modesto';
+                break;
+            
+            case ($gim > 3 && $gim <= 4):
+                $name = 'escaso';
+                break;
+            
+            case ($gim > 1.8 && $gim <= 3):
+                $name = 'muyescaso';
+                break;
+
+            case ($gim > 0.5 && $gim <= 1.8):
+                $name = 'trazas';
+                break;
+
+            case ($gim <= 0.5):
+                $name = 'singrasa';
+                break;
+            
+            default:
+                # code...
+                break;
+        }
+        $path = 'images/marbling/' . $name . '.png';
+         
+        return $path;
+    }
 
 }

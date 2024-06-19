@@ -160,7 +160,31 @@ class AnimalResource extends Resource
 
                         return number_format($rc, 2);
 
-                    }),
+                }),
+                Tables\Columns\TextColumn::make('grade')
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->sortable()
+                    ->searchable()
+                    ->label('Grado')
+                    ->getStateUsing(function ($record){
+
+                        $grado = AnimalResource::getGrade($record->gim,'grade');
+                        $name = AnimalResource::getGrade($record->gim,'name');
+                        return $grado . ' - ' . $name;
+
+                }),
+                ImageColumn::make('gradeImage')
+                ->toggleable(isToggledHiddenByDefault: true)
+                ->getStateUsing(function ($record) {
+
+                    $gim = $record->gim;
+                    $name = AnimalResource::getGrade($gim,'name');
+                    $name = strtolower(str_replace(' ','',$name));
+                    $gradeImage = "marbling\/$name.png";
+
+                    return $gradeImage;
+                })
+                ->label('Img Grado')
             ])
             ->filters([
                 //
@@ -187,46 +211,99 @@ class AnimalResource extends Resource
 
     public static function infolist(Infolist $infolist): Infolist
     {
+
+        // return $infolist
+        //     ->schema([
+        //         infolistSection::make([
+        //             InfolistSection::make([
+        //                 TextEntry::make('category')
+        //                 ->label('Categoria')
+        //                 ->size('lg')
+        //                 ->weight('bold'),
+        //             ])
+        //             ->columnSpan(1),
+
+        //             InfolistSection::make([
+        //                 TextEntry::make('category')
+        //                 ->label('Categoria')
+        //                 ->size('lg')
+        //                 ->weight('bold')
+        //             ])
+        //             ->columnSpan(1),
+
+        //         ])->columns(2),
+
+        //         InfolistSection::make([
+        //             TextEntry::make('grade')
+        //                 ->getStateUsing(function ($record) {
+
+        //                     $gim = $record->gim;
+        //                     $grade = AnimalResource::getGrade($gim,'grade');
+        //                     $name = AnimalResource::getGrade($gim,'name');
+
+        //                     return $grade . ' ' . $name;
+        //                 })
+        //                 ->label('Grado')
+        //                 ->size('lg')
+        //                 ->weight('bold'),
+        //             ImageEntry::make('grade')
+        //                 ->hiddenLabel()  
+        //                 ->visibility('private')
+        //                 ->height(150)
+        //                 ->extraImgAttributes([
+        //                     'class' => 'mx-auto block',
+        //                     'loading' => 'lazy',
+        //                 ])
+        //                 ->getStateUsing(function ($record) {
+
+        //                     $gim = $record->gim;
+        //                     $name = AnimalResource::getGrade($gim,'name');
+        //                     $name = strtolower(str_replace(' ','',$name));
+        //                     $gradeImage = "marbling\/$name.png";
+
+        //                     return $gradeImage;
+        //                 })
+        //         ])
+        //         ->columns(1),
+
+        //     ])
+        //     ->columns(3);
+
         return $infolist
-            ->schema([
-                InfolistSection::make([
-                    TextEntry::make('category')
-                    ->label('Categoria')
-                    ->size('lg')
-                    ->weight('bold')
+        ->schema([
+            Components\Section::make()
+                ->schema([
+                    Components\Split::make([
+                        Components\Grid::make(2)
+                            ->schema([
+                                Components\Group::make([
+                                    Components\TextEntry::make('title'),
+                                    Components\TextEntry::make('slug'),
+                                    Components\TextEntry::make('published_at')
+                                        ->badge()
+                                        ->date()
+                                        ->color('success'),
+                                ]),
+                                Components\Group::make([
+                                    Components\TextEntry::make('author.name'),
+                                    Components\TextEntry::make('category.name'),
+                                    Components\SpatieTagsEntry::make('tags'),
+                                ]),
+                            ]),
+                        Components\ImageEntry::make('image')
+                            ->hiddenLabel()
+                            ->grow(false),
+                    ])->from('lg'),
+                ]),
+            Components\Section::make('Content')
+                ->schema([
+                    Components\TextEntry::make('content')
+                        ->prose()
+                        ->markdown()
+                        ->hiddenLabel(),
                 ])
-                ->columnSpan(2),
-                InfolistSection::make([
-                    TextEntry::make('grade')
-                        ->getStateUsing(function ($record) {
-
-                            $gim = $record->gim;
-                            $grade = AnimalResource::getGrade($gim,'grade');
-                            $name = AnimalResource::getGrade($gim,'name');
-
-                            return $grade . ' ' . $name;
-                        })
-                        ->label('Grado')
-                        ->size('lg')
-                        ->weight('bold'),
-                    ImageEntry::make('imageGrade')
-                        ->hiddenLabel()  
-                        ->view('grade-image')  
-                        ->extraAttributes(function ($record) {
-                            $gim = $record->gim;
-                            $name = AnimalResource::getGrade($gim,'name');
-                            $path = "marbling\\" . $name;
-
-                            return [
-                                'path' => $path,
-                            ];
-
-                        }),
-                ])
-                ->columnSpan(1),
-
-            ])
-            ->columns(3);
+                ->collapsible(),
+        ]);
     }
 
     public static function getRelations(): array

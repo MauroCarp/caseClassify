@@ -1,5 +1,3 @@
-@props(['path'])
-@dump($path)
+@dump($gim)
 <div>
-   {{-- <img src="{{Storage::url($path)}}" alt=""> --}}
 </div>

@@ -16,6 +16,10 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\FileUpload;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\Section as InfolistSection;
+use Filament\Infolists\Components\Split;
+use Filament\Infolists\Components\Grid;
+use Filament\Infolists\Components\Group;
+use Filament\Infolists\Components\SpatieTagsEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Tables\Actions\Action;
@@ -33,7 +37,7 @@ class AnimalResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Animales';
 
-    protected static ?string $modelLabel = 'Registro';
+    protected static ?string $modelLabel = 'Animal';
 
     public static function form(Form $form): Form
     {
@@ -43,7 +47,7 @@ class AnimalResource extends Resource
                     ->label('Categoria')
                     ->options([
                         'Vaquillona' => 'Vaquillona',
-                        'Nsovillo' => 'Novillo',
+                        'Novillo' => 'Novillo',
                     ])
                     ->default('Vaquillona') // Establecer 'dorsal' como seleccionado por defecto
                     ->required(),
@@ -211,93 +215,142 @@ class AnimalResource extends Resource
 
     public static function infolist(Infolist $infolist): Infolist
     {
-
-        // return $infolist
-        //     ->schema([
-        //         infolistSection::make([
-        //             InfolistSection::make([
-        //                 TextEntry::make('category')
-        //                 ->label('Categoria')
-        //                 ->size('lg')
-        //                 ->weight('bold'),
-        //             ])
-        //             ->columnSpan(1),
-
-        //             InfolistSection::make([
-        //                 TextEntry::make('category')
-        //                 ->label('Categoria')
-        //                 ->size('lg')
-        //                 ->weight('bold')
-        //             ])
-        //             ->columnSpan(1),
-
-        //         ])->columns(2),
-
-        //         InfolistSection::make([
-        //             TextEntry::make('grade')
-        //                 ->getStateUsing(function ($record) {
-
-        //                     $gim = $record->gim;
-        //                     $grade = AnimalResource::getGrade($gim,'grade');
-        //                     $name = AnimalResource::getGrade($gim,'name');
-
-        //                     return $grade . ' ' . $name;
-        //                 })
-        //                 ->label('Grado')
-        //                 ->size('lg')
-        //                 ->weight('bold'),
-        //             ImageEntry::make('grade')
-        //                 ->hiddenLabel()  
-        //                 ->visibility('private')
-        //                 ->height(150)
-        //                 ->extraImgAttributes([
-        //                     'class' => 'mx-auto block',
-        //                     'loading' => 'lazy',
-        //                 ])
-        //                 ->getStateUsing(function ($record) {
-
-        //                     $gim = $record->gim;
-        //                     $name = AnimalResource::getGrade($gim,'name');
-        //                     $name = strtolower(str_replace(' ','',$name));
-        //                     $gradeImage = "marbling\/$name.png";
-
-        //                     return $gradeImage;
-        //                 })
-        //         ])
-        //         ->columns(1),
-
-        //     ])
-        //     ->columns(3);
+        $engMeasures = array('libras'=>2.204,'inch'=>0.0393,'inch2'=>0.155,'kph%'=>3.3);
 
         return $infolist
         ->schema([
-            Components\Section::make()
+            InfolistSection::make()
                 ->schema([
-                    Components\Split::make([
-                        Components\Grid::make(2)
+                    Split::make([
+                        Grid::make(3)
                             ->schema([
-                                Components\Group::make([
-                                    Components\TextEntry::make('title'),
-                                    Components\TextEntry::make('slug'),
-                                    Components\TextEntry::make('published_at')
-                                        ->badge()
-                                        ->date()
-                                        ->color('success'),
+                                Group::make([
+                                    TextEntry::make('category')
+                                        ->label('Categoria')
+                                        ->size('lg')
+                                        ->weight('bold'),                            
+                                    TextEntry::make('weight')
+                                        ->label('Peso')
+                                        ->size('lg')
+                                        ->weight('bold')
+                                        ->getStateUsing(function ($record) {
+                
+                                            return $record->weight . ' Kg';
+                                            
+                                        }),                           
+                                        TextEntry::make('AoB')
+                                        ->label('AoB')
+                                        ->size('lg')
+                                        ->weight('bold')
+                                        ->getStateUsing(function ($record) {
+                
+                                            return $record->AoB . ' cm²';
+                                            
+                                        }),       
+                                        TextEntry::make('im')
+                                        ->label('I.M')
+                                        ->size('lg')
+                                        ->weight('bold')
+                                        ->getStateUsing(function ($record) {
+                
+                                            $indiceMuscularidad = ($record->AoB / $record->weight) * 100; 
+                                            return number_format($indiceMuscularidad, 0);
+                                            
+                                        }),       
+                                    ]),
+                                Group::make([
+                                    TextEntry::make('rfid')->size('lg')
+                                        ->size('lg')
+                                        ->label('RFID')
+                                        ->weight('bold'),
+                                    TextEntry::make('gd')
+                                        ->label('G.D')
+                                        ->size('lg')
+                                        ->weight('bold'),
+                                    TextEntry::make('case')
+                                        ->label('Carcasa')
+                                        ->size('lg')
+                                        ->weight('bold')
+                                        ->getStateUsing(function ($record) {
+                
+                                            $case = $record->weight * 0.59; 
+                                            return number_format($case, 0);
+
+                                        }),
+                                    TextEntry::make('yg')
+                                        ->label('Yield Grade')
+                                        ->size('lg')
+                                        ->weight('bold')
+                                        ->getStateUsing(function ($record) use ($engMeasures) {
+                
+                                            $case = $record->weight * 0.59; 
+
+                                            $n1 = $record->gd * $engMeasures['inch'];
+                                            $n2 = $engMeasures['kph%'];
+                                            $n3 = $case * $engMeasures['libras'];
+                                            $n4 = $record->AoB * $engMeasures['inch2'];
+                                
+                                            $yieldGrade = 2.5+(2.5*$n1)+(0.2*$n2)+(0.0038*$n3)-(0.32*$n4); 
+                    
+                                            return number_format($yieldGrade, 1);
+
+                                        }),
                                 ]),
-                                Components\Group::make([
-                                    Components\TextEntry::make('author.name'),
-                                    Components\TextEntry::make('category.name'),
-                                    Components\SpatieTagsEntry::make('tags'),
-                                ]),
+                                Group::make([
+                                    TextEntry::make('grade')
+                                        ->getStateUsing(function ($record) {
+                
+                                            $gim = $record->gim;
+                                            $grade = AnimalResource::getGrade($gim,'grade');
+                                            $name = AnimalResource::getGrade($gim,'name');
+                
+                                            return $grade . ' - ' . $name;
+                                        })
+                                        ->label('Grado')
+                                        ->size('lg')
+                                        ->weight('bold'),
+                                    ImageEntry::make('grade-image')
+                                        ->hiddenLabel()  
+                                        ->visibility('private')
+                                        ->height(150)
+                                        ->grow(false)
+                                        ->extraImgAttributes([
+                                            'class' => 'mx-auto block',
+                                            'loading' => 'lazy',
+                                        ])
+                                        ->getStateUsing(function ($record) {
+                
+                                            $gim = $record->gim;
+                                            $name = AnimalResource::getGrade($gim,'name');
+                                            $name = strtolower(str_replace(' ','',$name));
+                                            $gradeImage = "marbling\/$name.png";
+                
+                                            return $gradeImage;
+                                        }),
+                                    TextEntry::make('rc')
+                                        ->getStateUsing(function ($record) use ($engMeasures) {
+
+                                            $case = $record->weight * 0.59; 
+                    
+                                            $n1 = $record->gd * $engMeasures['inch'];
+                                            $n2 = $engMeasures['kph%'];
+                                            $n3 = $case * $engMeasures['libras'];
+                                            $n4 = $record->AoB * $engMeasures['inch2'];
+                    
+                                            $rc = 65.59-(9.93*$n1)-(1.29*$n2)+(1.23*$n4)-(0.013*$n3); 
+                    
+                                            return number_format($rc, 2);
+                                        })
+                                        ->label('% R.C')
+                                        ->size('lg')
+                                        ->weight('bold'),
+                                ])
                             ]),
-                        Components\ImageEntry::make('image')
-                            ->hiddenLabel()
-                            ->grow(false),
                     ])->from('lg'),
                 ]),
-            Components\Section::make('Content')
+            InfolistSection::make('Ecografias')
                 ->schema([
-                    Components\TextEntry::make('content')
+                    TextEntry::make('ecography')
                         ->prose()
                         ->markdown()
                         ->hiddenLabel(),

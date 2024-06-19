@@ -14,6 +14,10 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\FileUpload;
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\Section as InfolistSection;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Columns\ImageColumn;
@@ -162,16 +166,9 @@ class AnimalResource extends Resource
                 //
             ])
             ->actions([
-                Action::make('showMore')
-                ->label('Ver Más')
-                ->icon('heroicon-o-eye')
-                ->action(function (Animal $record) {
-                    // Lógica de la acción personalizada
-                    // Puedes hacer cualquier cosa aquí, por ejemplo, redirigir a una página diferente
-                    return false;
-                }),
-                Tables\Actions\EditAction::make(),
-
+                Tables\Actions\ViewAction::make()
+                ->color('primary'),
+                Tables\Actions\EditAction::make()
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -188,11 +185,106 @@ class AnimalResource extends Resource
             ]);
     }
 
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                InfolistSection::make([
+                    TextEntry::make('category')
+                    ->label('Categoria')
+                    ->size('lg')
+                    ->weight('bold')
+                ])
+                ->columnSpan(2),
+                InfolistSection::make([
+                    TextEntry::make('grade')
+                        ->getStateUsing(function ($record) {
+
+                            $gim = $record->gim;
+                            $grade = AnimalResource::getGrade($gim,'grade');
+                            $name = AnimalResource::getGrade($gim,'name');
+
+                            return $grade . ' ' . $name;
+                        })
+                        ->label('Grado')
+                        ->size('lg')
+                        ->weight('bold'),
+                    ImageEntry::make('imageGrade')
+                        ->hiddenLabel()  
+                        ->view('grade-image')  
+                        ->extraAttributes(function ($record) {
+                            $gim = $record->gim;
+                            $name = AnimalResource::getGrade($gim,'name');
+                            $path = "marbling\\" . $name;
+
+                            return [
+                                'path' => $path,
+                            ];
+
+                        }),
+                ])
+                ->columnSpan(1),
+
+            ])
+            ->columns(3);
+    }
+
     public static function getRelations(): array
     {
         return [
             //
         ];
+    }
+
+    public static function getGrade($gim, $type): string
+    {
+        
+        switch ($gim) {
+            case $gim > 6.5:
+                $grade = 6;
+                $name = 'Abundante';
+                break;
+            case ($gim > 5 && $gim <= 6.5):
+                $grade = 5;
+                $name = 'Moderado';
+                break;
+            
+            case ($gim > 4 && $gim <= 5):
+                $grade = 4;
+                $name = 'Modesto';
+                break;
+            
+            case ($gim > 3 && $gim <= 4):
+                $grade = 3;
+                $name = 'Escaso';
+                break;
+            
+            case ($gim > 1.8 && $gim <= 3):
+                $grade = 2;
+                $name = 'Muy Escaso';
+                break;
+
+            case ($gim > 0.5 && $gim <= 1.8):
+                $grade = 1;
+                $name = 'Trazas';
+                break;
+
+            case ($gim <= 0.5):
+                $grade = 0;
+                $name = 'Sin Grasa';
+                break;
+            
+            default:
+                # code...
+                break;
+        }
+
+        if($type == 'grade'){
+            return $grade;
+        } else {
+            return $name;
+        }
+
     }
 
     public static function getPages(): array
@@ -203,4 +295,7 @@ class AnimalResource extends Resource
             'edit' => Pages\EditAnimal::route('/{record}/edit'),
         ];
     }
+
+
+
 }

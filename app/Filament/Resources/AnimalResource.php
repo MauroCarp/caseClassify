@@ -3,29 +3,28 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\AnimalResource\Pages;
-use App\Filament\Resources\AnimalResource\RelationManagers;
 use App\Models\Animal;
+use App\Models\Folder;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\ViewField;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\Section as InfolistSection;
 use Filament\Infolists\Components\Split;
 use Filament\Infolists\Components\Grid;
 use Filament\Infolists\Components\Group;
-use Filament\Infolists\Components\SpatieTagsEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
-use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Columns\ImageColumn;
-
+use Filament\Infolists\Components\SpatieMediaLibraryImageEntry;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 
 class AnimalResource extends Resource
 {
@@ -195,21 +194,36 @@ class AnimalResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()
-                ->color('primary'),
+                ->color('primary')
+                ->modalHeading('Detalles del Animal')
+                ->slideOver(),
                 Tables\Actions\EditAction::make()
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                Tables\Actions\DeleteBulkAction::make(),
-                BulkAction::make('assignToFolder')
-                ->label('Asignar a Carpeta')
-                ->icon('heroicon-o-arrow-up-on-square-stack')
-                ->action(function (Animal $record) {
-                    // Lógica de la acción personalizada
-                    // Puedes hacer cualquier cosa aquí, por ejemplo, redirigir a una página diferente
-                    return false;
-                }),
-                ]),
+                    Tables\Actions\DeleteBulkAction::make(),
+                    BulkAction::make('assignToFolder')
+                        ->label('Asignar a Carpeta')
+                        ->icon('heroicon-o-arrow-up-on-square-stack')
+                        ->requiresConfirmation()
+                        ->deselectRecordsAfterCompletion()
+                        ->action(function (Collection $records, array $data) {
+                            // Lógica para asignar los registros a una carpeta
+                            foreach ($records as $record) {
+                                $record->folder_id = $data['folder_id']; // Asigna el ID de la carpeta
+                                $record->save();
+                            }
+        
+                            // Mensaje de éxito
+                            $this->success('Registros asignados a la carpeta exitosamente.');
+                        })
+                        ->form([
+                            Select::make('folder_id')
+                                ->label('Carpeta')
+                                ->options(Folder::all()->pluck('name', 'id')->toArray()) // Obtén las opciones de las carpetas
+                                ->required(),
+                        ]),
+                ])
             ]);
     }
 
@@ -327,42 +341,61 @@ class AnimalResource extends Resource
                 
                                             return $gradeImage;
                                         }),
-                                    TextEntry::make('rc')
-                                        ->getStateUsing(function ($record) use ($engMeasures) {
+                                    Grid::make(2)
+                                        ->schema([
+                                        TextEntry::make('rc')
+                                            ->getStateUsing(function ($record) use ($engMeasures) {
 
-                                            $case = $record->weight * 0.59; 
-                    
-                                            $n1 = $record->gd * $engMeasures['inch'];
-                                            $n2 = $engMeasures['kph%'];
-                                            $n3 = $case * $engMeasures['libras'];
-                                            $n4 = $record->AoB * $engMeasures['inch2'];
-                    
-                                            $rc = 65.59-(9.93*$n1)-(1.29*$n2)+(1.23*$n4)-(0.013*$n3); 
-                    
-                                            return number_format($rc, 2);
-                                        })
-                                        ->label('% R.C')
-                                        ->size('lg')
-                                        ->weight('bold'),
+                                                $case = $record->weight * 0.59; 
+                        
+                                                $n1 = $record->gd * $engMeasures['inch'];
+                                                $n2 = $engMeasures['kph%'];
+                                                $n3 = $case * $engMeasures['libras'];
+                                                $n4 = $record->AoB * $engMeasures['inch2'];
+                        
+                                                $rc = 65.59-(9.93*$n1)-(1.29*$n2)+(1.23*$n4)-(0.013*$n3); 
+                        
+                                                return number_format($rc, 2);
+                                            })
+                                            ->label('% R.C')
+                                            ->size('lg')
+                                            ->weight('bold'),
+                                        TextEntry::make('ms')
+                                            ->getStateUsing(function ($record) use ($engMeasures) {
+
+                                                $gim = $record->gim;
+
+                                                $ms = ((769.7 + (56.69 * $gim)) / 100) - 5;
+                                                return number_format($ms, 1);
+                                            })
+                                            ->label('Marbling Score')
+                                            ->size('lg')
+                                            ->weight('bold'),
+                                
+                                        ])
                                 ])
                             ]),
                     ])->from('lg'),
                 ]),
             InfolistSection::make('Ecografias')
                 ->schema([
-                    TextEntry::make('ecography')
-                        ->prose()
-                        ->markdown()
-                        ->hiddenLabel(),
+                    TextEntry::make('images')
+                    ->hiddenLabel()
+                    ->getStateUsing(function ($record) {
+
+                        $media = $record->images; // Obtén la URL de la primera imagen
+
+                        return view('components.image-view', ['urls' => $media]);
+                    }),
                 ])
                 ->collapsible(),
         ]);
-    }
+        }
 
     public static function getRelations(): array
     {
         return [
-            //
+            //  
         ];
     }
 
@@ -429,3 +462,4 @@ class AnimalResource extends Resource
 
 
 }
+?>

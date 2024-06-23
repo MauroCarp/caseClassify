@@ -115,6 +115,19 @@ class AnimalResource extends Resource
                         return number_format($case, 0);
 
                     }),
+                Tables\Columns\TextColumn::make('assigned')
+                    ->label('Asignado')
+                    ->badge()
+                    ->colors([
+                        'success' => fn ($state): bool => $state,
+                        'danger' => fn ($state): bool => !$state,
+                    ])
+                    ->icons([
+                        'heroicon-o-check' => fn ($state): bool => $state,
+                        'heroicon-o-x' => fn ($state): bool => !$state,
+                    ])
+                    ->getStateUsing(fn ($record) => !is_null($record->idFolders)),
+
                 Tables\Columns\TextColumn::make('im')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable()
@@ -210,15 +223,15 @@ class AnimalResource extends Resource
                         ->action(function (Collection $records, array $data) {
                             // Lógica para asignar los registros a una carpeta
                             foreach ($records as $record) {
-                                $record->folder_id = $data['folder_id']; // Asigna el ID de la carpeta
+                                $record->idFolders = $data['idFolders']; // Asigna el ID de la carpeta
                                 $record->save();
                             }
         
                             // Mensaje de éxito
-                            $this->success('Registros asignados a la carpeta exitosamente.');
                         })
+                        // ->success('Registros asignados a la carpeta exitosamente.')
                         ->form([
-                            Select::make('folder_id')
+                            Select::make('idFolders')
                                 ->label('Carpeta')
                                 ->options(Folder::all()->pluck('name', 'id')->toArray()) // Obtén las opciones de las carpetas
                                 ->required(),

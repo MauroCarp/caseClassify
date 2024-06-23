@@ -15,6 +15,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Actions\Action;
 use App\Models\User;
 
+ // Asegúrate de tener esta línea para la página de detalles
+
 class FolderResource extends Resource
 {
     protected static ?string $model = Folder::class;
@@ -36,7 +38,7 @@ class FolderResource extends Resource
                 ->maxLength(255)
                 ->label('Carpeta'),
                 Forms\Components\Select::make('userId')
-                ->options(User::all()->pluck('name', 'id')->toArray())
+                ->options(User::where('isAdmin',0)->pluck('name', 'id')->toArray())
                 ->label('Usuario')
                 ->searchable()
                 ->preload()
@@ -61,6 +63,8 @@ class FolderResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make()
+                ->color('primary'),
                 Action::make('makeInform')
                 ->label('Informe')
                 ->icon('heroicon-o-information-circle')
@@ -91,6 +95,7 @@ class FolderResource extends Resource
             'index' => Pages\ListFolders::route('/'),
             'create' => Pages\CreateFolder::route('/create'),
             'edit' => Pages\EditFolder::route('/{record}/edit'),
-        ];
+            'view' => Pages\ViewFolder::route('/{record}'),        ]
+            ;
     }
 }

@@ -43,6 +43,9 @@ class UserResource extends Resource
                     ->required()
                     ->label('Contraseña')
                     ->maxLength(191),
+                Forms\Components\Toggle::make('isAdmin')
+                    ->label('Administrador')
+                    ->default(false),
             ]);
     }
 

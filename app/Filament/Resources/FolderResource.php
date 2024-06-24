@@ -4,18 +4,15 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\AnimalResource\Widgets\AnimalFolderTable;
 use App\Filament\Resources\FolderResource\Pages;
-use App\Filament\Resources\FolderResource\RelationManagers;
 use App\Models\Folder;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Actions\Action;
 use App\Models\User;
-use Filament\Forms\Components\TextInput;
+use Barryvdh\DomPDF\Facade\Pdf;
 
  // Asegúrate de tener esta línea para la página de detalles
 
@@ -70,11 +67,11 @@ class FolderResource extends Resource
                 Action::make('makeInform')
                 ->label('Informe')
                 ->icon('heroicon-o-information-circle')
-                ->action(function (Folder $record) {
-                    // Lógica de la acción personalizada
-                    // Puedes hacer cualquier cosa aquí, por ejemplo, redirigir a una página diferente
-                    return false;
-                }),
+                ->requiresConfirmation()
+                ->url(
+                    fn ($record): string => route('pdf.example',['folder',$record]),
+                    shouldOpenInNewTab: true
+                ),
                 
             ])
             ->bulkActions([

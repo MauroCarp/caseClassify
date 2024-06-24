@@ -13,8 +13,7 @@ use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
-
- // Asegúrate de tener esta línea para la página de detalles
+use Carbon\Carbon;
 
 class FolderResource extends Resource
 {
@@ -55,7 +54,9 @@ class FolderResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')->label('Carpeta'),
                 Tables\Columns\TextColumn::make('user.name')->label('Usuario'),
-                Tables\Columns\TextColumn::make('date')->label('Fecha'),
+                Tables\Columns\TextColumn::make('date')
+                ->getStateUsing(fn ($record) => Carbon::parse($record->date)->format('d-m-Y'))
+                ->label('Fecha'),
             ])
             ->filters([
                 //
@@ -69,7 +70,7 @@ class FolderResource extends Resource
                 ->icon('heroicon-o-information-circle')
                 ->requiresConfirmation()
                 ->url(
-                    fn ($record): string => route('pdf.example',['folder',$record]),
+                    fn ($record): string => route('pdf.inform',['folder'=>$record]),
                     shouldOpenInNewTab: true
                 ),
                 

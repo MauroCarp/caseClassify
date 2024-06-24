@@ -53,4 +53,6 @@ class DashboardPanelProvider extends PanelProvider
                 Authenticate::class,
             ]);
     }
+
+
 }

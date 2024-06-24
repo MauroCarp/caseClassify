@@ -17,4 +17,9 @@ class Folder extends Model
         return $this->hasMany(Animal::class, 'idFolder');
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'userId');
+    }
+
 }

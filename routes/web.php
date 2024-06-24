@@ -18,4 +18,4 @@ Route::get('/', function () {
     return redirect('/dashboard');
 });
 
-Route::get('/pdf/generate/folder', [PdfController::class,'folderRecords'])->name('pdf.example');
+Route::get('/pdf/generate/folder', [PdfController::class,'folderRecords'])->name('pdf.inform');

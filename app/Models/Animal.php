@@ -18,6 +18,11 @@ class Animal extends Model implements HasMedia
     protected $casts = [
         'images' => 'array',
     ];
+    
+    public function folder()
+    {
+        return $this->belongsTo(Folder::class, 'idFolder', 'id');
+    }
 
     public function registerMediaCollections(): void
     {

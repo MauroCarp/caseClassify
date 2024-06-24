@@ -12,7 +12,9 @@ class Folder extends Model
 
     protected $guarded = [];
 
-    public function animals():HasMany{
-        return $this->hasMany(Animal::class);
+    public function animals(): HasMany
+    {
+        return $this->hasMany(Animal::class, 'idFolder');
     }
+
 }

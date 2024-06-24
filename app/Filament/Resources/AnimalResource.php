@@ -124,9 +124,9 @@ class AnimalResource extends Resource
                     ])
                     ->icons([
                         'heroicon-o-check' => fn ($state): bool => $state,
-                        'heroicon-o-x' => fn ($state): bool => !$state,
+                        'heroicon-o-x-circle' => fn ($state): bool => !$state,
                     ])
-                    ->getStateUsing(fn ($record) => !is_null($record->idFolders)),
+                    ->getStateUsing(fn ($record) => !is_null($record->idFolder)),
 
                 Tables\Columns\TextColumn::make('im')
                     ->toggleable(isToggledHiddenByDefault: true)
@@ -223,7 +223,7 @@ class AnimalResource extends Resource
                         ->action(function (Collection $records, array $data) {
                             // Lógica para asignar los registros a una carpeta
                             foreach ($records as $record) {
-                                $record->idFolders = $data['idFolders']; // Asigna el ID de la carpeta
+                                $record->idFolder = $data['idFolder']; // Asigna el ID de la carpeta
                                 $record->save();
                             }
         
@@ -231,7 +231,7 @@ class AnimalResource extends Resource
                         })
                         // ->success('Registros asignados a la carpeta exitosamente.')
                         ->form([
-                            Select::make('idFolders')
+                            Select::make('idFolder')
                                 ->label('Carpeta')
                                 ->options(Folder::all()->pluck('name', 'id')->toArray()) // Obtén las opciones de las carpetas
                                 ->required(),

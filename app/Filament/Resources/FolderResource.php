@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Resources\AnimalResource\Widgets\AnimalFolderTable;
 use App\Filament\Resources\FolderResource\Pages;
 use App\Filament\Resources\FolderResource\RelationManagers;
 use App\Models\Folder;
@@ -14,6 +15,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Actions\Action;
 use App\Models\User;
+use Filament\Forms\Components\TextInput;
 
  // Asegúrate de tener esta línea para la página de detalles
 
@@ -64,7 +66,7 @@ class FolderResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\ViewAction::make()
-                ->color('primary'),
+                    ->color('primary'),
                 Action::make('makeInform')
                 ->label('Informe')
                 ->icon('heroicon-o-information-circle')
@@ -89,13 +91,20 @@ class FolderResource extends Resource
         ];
     }
 
+    public static function getWidgets(): array
+    {
+        return [
+            AnimalFolderTable::class,
+        ];
+    }
+
     public static function getPages(): array
     {
         return [
             'index' => Pages\ListFolders::route('/'),
             'create' => Pages\CreateFolder::route('/create'),
             'edit' => Pages\EditFolder::route('/{record}/edit'),
-            'view' => Pages\ViewFolder::route('/{record}'),        ]
-            ;
+            'view' => Pages\ViewFolder::route('/{record}'),        
+        ];
     }
 }

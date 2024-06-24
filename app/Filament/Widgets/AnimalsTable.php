@@ -1,13 +1,30 @@
 <?php
 
-namespace App\Filament\Resources\AnimalResource\Widgets;
+namespace App\Filament\Widgets;
 
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
+use App\Models\Animal;
+use App\Filament\Resources\AnimalResource;
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\Section as InfolistSection;
+use Filament\Infolists\Components\Split;
+use Filament\Infolists\Components\Grid;
+use Filament\Infolists\Components\Group;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
+use Filament\Tables\Columns\ImageColumn;
+
+
 
 class AnimalsTable extends BaseWidget
 {
+
+    protected int | string | array $columnSpan = '1';
+
+    protected static ?int $sort = 2;
+
     public function table(Table $table): Table
     {
 
@@ -37,6 +54,7 @@ class AnimalsTable extends BaseWidget
                     ->searchable()
                     ->label('AoB'),
                 Tables\Columns\TextColumn::make('case')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable()
                     ->searchable()
                     ->label('Carcasa')
@@ -107,7 +125,7 @@ class AnimalsTable extends BaseWidget
                         return $grado . ' - ' . $name;
 
                 }),
-                ImageColumn::make('gradeImage')
+                Tables\Columns\ImageColumn::make('gradeImage')
                 ->toggleable(isToggledHiddenByDefault: true)
                 ->getStateUsing(function ($record) {
 
@@ -283,25 +301,7 @@ class AnimalsTable extends BaseWidget
                         ])
                         ->collapsible(),
                 ])
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    BulkAction::make('assignToPurchase')
-                        ->label('Reservar')
-                        ->icon('heroicon-o-currency-dollar')
-                        ->requiresConfirmation()
-                        ->action(function (Collection $records, array $data) {
-
-                            foreach ($records as $record) {
-                                $record->sold = 1; 
-                                $record->save();
-                            }
-
-                            return false;
-                            // Mensaje de éxito
-                        })
-                        // ->success('Registros asignados a la carpeta exitosamente.')
-                ])
             ]);
     }
 }
+

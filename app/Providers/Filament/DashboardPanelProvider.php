@@ -29,7 +29,7 @@ class DashboardPanelProvider extends PanelProvider
             ->path('dashboard')
             ->login()
             ->defaultThemeMode(ThemeMode::Dark)
-            ->brandName('caseQuality')
+            ->brandName('CaseQuality')
             ->brandLogo(asset('images/logoBrand.png'))
             ->colors([
                 'primary' => Color::Amber,

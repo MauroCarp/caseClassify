@@ -17,6 +17,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Filament\Enums\ThemeMode;
 
 class DashboardPanelProvider extends PanelProvider
 {
@@ -27,6 +28,9 @@ class DashboardPanelProvider extends PanelProvider
             ->id('dashboard')
             ->path('dashboard')
             ->login()
+            ->defaultThemeMode(ThemeMode::Dark)
+            ->brandName('caseQuality')
+            ->brandLogo(asset('images/logoBrand.png'))
             ->colors([
                 'primary' => Color::Amber,
             ])

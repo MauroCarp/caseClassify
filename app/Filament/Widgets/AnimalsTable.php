@@ -24,6 +24,8 @@ class AnimalsTable extends BaseWidget
     protected int | string | array $columnSpan = '1';
 
     protected static ?int $sort = 2;
+    protected static ?string $heading = 'Listado de animales';
+
 
     public function table(Table $table): Table
     {

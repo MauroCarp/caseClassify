@@ -24,6 +24,8 @@ class AnimalFolderTable extends BaseWidget
     protected int|string|array $columnSpan = 'full'; // Ocupar todo el ancho disponible
 
     public string $idFolder;
+    
+    protected static ?string $heading = 'Listado de animales';
 
     public function table(Table $table): Table
     {

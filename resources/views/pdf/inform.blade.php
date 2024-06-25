@@ -1,20 +1,20 @@
 <style>
-        .header {
-            color: black;
-            text-align: left;
-            font-family:'FreeMono, monospace';
-        }
-        .header img {
-            width: 150px;
-            vertical-align: middle;
-        }
-        .header h1 {
-            display: inline;
-            font-size: 24px;
-        }
-        .content {
-            padding: 20px;
-        }
+    .header {
+        color: black;
+        text-align: left;
+        font-family:'FreeMono, monospace';
+    }
+    .header img {
+        width: 150px;
+        vertical-align: middle;
+    }
+    .header h1 {
+        display: inline;
+        font-size: 24px;
+    }
+    .content {
+        padding: 20px;
+    }
 
     .container {
         width: 80%;
@@ -66,6 +66,9 @@
 
     </style>
 
+<div class="contenedor">
+    <img src="storage/images/logo-back.png" style="margin:0 auto;width:100%;position:absolute;z-index:0;top:25%">
+
     <div class="header">
         <h1>Resúmen de compra</h1>
         <img src="storage/images/barlovento-logo.png" alt="Logo" style="float:right">
@@ -98,6 +101,8 @@
     </div>
 
     <div class="signature">
-        <img src="storage/images/f1.png" alt="Firma Barlovento" width="200px" style="float:right;padding-right:30px">
-        <img src="storage/images/f2.png" alt="Firma Veterinario" width="200px" style="float:left;">
+        <img src="storage/images/f2.png" alt="Firma Veterinario" width="200px" style="float:right;padding-right:30px">
+        <img src="storage/images/f1.png" alt="Firma Barlovento" width="200px" style="float:left;">
     </div>
+
+</div>

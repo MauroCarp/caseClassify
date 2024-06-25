@@ -63,6 +63,28 @@ class AnimalFolderTable extends BaseWidget
                         return number_format($case, 0);
 
                     }),
+                Tables\Columns\TextColumn::make('sold')
+                    ->sortable()
+                    ->searchable()
+                    ->label('Estado')
+                    ->badge()
+                    ->colors([
+                        'success' => fn ($state): bool => $state,
+                        'danger' => fn ($state): bool => !$state,
+                    ])
+                    ->icons([
+                        'heroicon-o-check' => fn ($state): bool => $state,
+                        'heroicon-o-x-circle' => fn ($state): bool => !$state,
+                    ])
+                    ->getStateUsing(function ($record) { 
+
+                        if($record->sold)
+                            return 'Reservado';
+                        else    
+                            return 'Disponible';
+
+                    }),
+                    
                 Tables\Columns\TextColumn::make('im')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable()

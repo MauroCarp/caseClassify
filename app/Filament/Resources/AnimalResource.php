@@ -23,6 +23,7 @@ use Filament\Infolists\Infolist;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -117,22 +118,17 @@ class AnimalResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('category')
                     ->sortable()
-                    ->searchable()
                     ->label('Categoria'),
                 Tables\Columns\TextColumn::make('rfid')
                     ->sortable()
-                    ->searchable()
                     ->label('RFID'),
                 Tables\Columns\TextColumn::make('weight')
                     ->sortable()
-                    ->searchable()
                     ->label('Peso'),
                 Tables\Columns\TextColumn::make('gd')
-                    ->searchable()
                     ->label('G.D'),
                 Tables\Columns\TextColumn::make('AoB')
                     ->sortable()
-                    ->searchable()
                     ->label('AoB'),
                 Tables\Columns\TextColumn::make('case')
                     ->sortable()
@@ -145,7 +141,6 @@ class AnimalResource extends Resource
                     }),
                 Tables\Columns\TextColumn::make('gim')
                     ->sortable()
-                    ->searchable()
                     ->label('% G.I.M'),
                 Tables\Columns\TextColumn::make('assigned')
                     ->toggleable(isToggledHiddenByDefault: true)
@@ -229,36 +224,23 @@ class AnimalResource extends Resource
                 ->label('Img Grado')
             ])
             ->filters([
-                Filter::make('grade')
-                   ->form([
-                    Forms\Components\Select::make('grade')
-                        ->label('Grado')
-                        ->multiple()
-                        ->options([
-                            '6' => '6 - Abundante',
-                            '5' => '5 - Moderado',
-                            '4' => '4 - Modesto',
-                            '3' => '3 - Escaso',
-                            '2' => '2 - Muy Escaso',
-                            '1' => '1 - Trazas',
-                            '0' => '0 - Sin Grasa',
-                        ])
-                        ->preload()
+                SelectFilter::make('category')
+                    ->label('Categoria')
+                    ->options([
+                        'Vaquillona' => 'Vaquillona',
+                        'Novillo' => 'Novillo',
+                    ]),
+                SelectFilter::make('grade')
+                    ->label('Grado')
+                    ->options([
+                        '6 - Abundante' => '6 - Abundante',
+                        '5 - Moderado' => '5 - Moderado',
+                        '4 - Modesto' => '4 - Modesto',
+                        '3 - Escaso' => '3 - Escaso',
+                        '2 - Muy Escaso' => '2 - Muy Escaso',
+                        '1 - Trazas' => '1 - Trazas',
+                        '0 - Sin Grasa' => '0 - Sin Grasa',
                     ])
-                    ->query(function (Builder $query, array $data) {
-
-                        if (!empty($data['grade'])) {
-                            $gradeNumbers = array_keys($data['grade']);
-                            $query->where(function ($query) use ($gradeNumbers) {
-                                foreach ($gradeNumbers as $gradeNumber) {
-                                    $query->orWhere(function ($query) use ($gradeNumber) {
-                                        $query->whereRaw("grade = ?", [$gradeNumber]); // Replace `some_column` with the actual column name used in getGrade calculation
-                                    });
-                                }
-                            });
-                        }
-
-                    }),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()

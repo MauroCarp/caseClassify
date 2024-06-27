@@ -144,25 +144,24 @@ class AnimalsTable extends BaseWidget
 
                 Tables\Actions\ViewAction::make()
                 ->color('primary')
-                ->slideOver()
                 ->infolist([
                     InfolistSection::make()
                         ->schema([
                             Split::make([
-                                Grid::make(3)
+                                Grid::make(4)
                                     ->schema([
                                         Group::make([
                                             TextEntry::make('category')
                                                 ->label('Categoria')
                                                 ->size('lg')
                                                 ->weight('bold'),                            
-                                            TextEntry::make('weight')
-                                                ->label('Peso')
+                                            TextEntry::make('gim')
+                                                ->label('Grasa Intramuscular')
                                                 ->size('lg')
                                                 ->weight('bold')
                                                 ->getStateUsing(function ($record) {
                         
-                                                    return $record->weight . ' Kg';
+                                                    return $record->gim . ' %';
                                                     
                                                 }),                           
                                                 TextEntry::make('AoB')
@@ -191,7 +190,7 @@ class AnimalsTable extends BaseWidget
                                                 ->label('RFID')
                                                 ->weight('bold'),
                                             TextEntry::make('gd')
-                                                ->label('G.D')
+                                                ->label('Grasa Dorsal')
                                                 ->size('lg')
                                                 ->weight('bold'),
                                             TextEntry::make('case')
@@ -201,7 +200,7 @@ class AnimalsTable extends BaseWidget
                                                 ->getStateUsing(function ($record) {
                         
                                                     $case = $record->weight * 0.59; 
-                                                    return number_format($case, 0);
+                                                    return number_format($case, 0) . ' Kg';
 
                                                 }),
                                             TextEntry::make('yg')
@@ -224,14 +223,63 @@ class AnimalsTable extends BaseWidget
                                                 }),
                                         ]),
                                         Group::make([
+                                            TextEntry::make('weight')
+                                                ->label('Peso')
+                                                ->size('lg')
+                                                ->weight('bold')
+                                                ->getStateUsing(function ($record) {
+                        
+                                                    return $record->weight . ' Kg';
+                                                    
+                                                }), 
+                                            TextEntry::make('AoB')
+                                                ->label('Area Ojo de Bife')
+                                                ->size('lg')
+                                                ->weight('bold')
+                                                ->getStateUsing(function ($record) {
+                        
+                                                    return $record->AoB . ' cm²';
+                                                    
+                                                }),  
+                                            TextEntry::make('rc')
+                                                ->getStateUsing(function ($record) use ($engMeasures) {
+
+                                                    $case = $record->weight * 0.59; 
+                            
+                                                    $n1 = $record->gd * $engMeasures['inch'];
+                                                    $n2 = $engMeasures['kph%'];
+                                                    $n3 = $case * $engMeasures['libras'];
+                                                    $n4 = $record->AoB * $engMeasures['inch2'];
+                            
+                                                    $rc = 65.59-(9.93*$n1)-(1.29*$n2)+(1.23*$n4)-(0.013*$n3); 
+                            
+                                                    return number_format($rc, 2);
+                                                })
+                                                ->label('% R.C')
+                                                ->size('lg')
+                                                ->weight('bold'),
+                                            TextEntry::make('ms')
+                                                ->getStateUsing(function ($record) use ($engMeasures) {
+
+                                                    $gim = $record->gim;
+
+                                                    $ms = ((769.7 + (56.69 * $gim)) / 100) - 5;
+                                                    return number_format($ms, 1);
+                                                })
+                                                ->label('Marbling Score')
+                                                ->size('lg')
+                                                ->weight('bold'), 
+                                            ]),
+                                        Group::make([
                                             TextEntry::make('grade')
                                                 ->getStateUsing(function ($record) {
                         
                                                     $gim = $record->gim;
                                                     $grade = AnimalResource::getGrade($gim,'grade');
                                                     $name = AnimalResource::getGrade($gim,'name');
-                        
-                                                    return $grade . ' - ' . $name;
+                                                    $quality = AnimalResource::getGrade($gim,'quality');
+                
+                                                    return $grade . ' - ' . $name . ' (' . $quality . ')';
                                                 })
                                                 ->label('Grado')
                                                 ->size('lg')
@@ -254,39 +302,7 @@ class AnimalsTable extends BaseWidget
                         
                                                     return $gradeImage;
                                                 }),
-                                            Grid::make(2)
-                                                ->schema([
-                                                TextEntry::make('rc')
-                                                    ->getStateUsing(function ($record) use ($engMeasures) {
-
-                                                        $case = $record->weight * 0.59; 
-                                
-                                                        $n1 = $record->gd * $engMeasures['inch'];
-                                                        $n2 = $engMeasures['kph%'];
-                                                        $n3 = $case * $engMeasures['libras'];
-                                                        $n4 = $record->AoB * $engMeasures['inch2'];
-                                
-                                                        $rc = 65.59-(9.93*$n1)-(1.29*$n2)+(1.23*$n4)-(0.013*$n3); 
-                                
-                                                        return number_format($rc, 2);
-                                                    })
-                                                    ->label('% R.C')
-                                                    ->size('lg')
-                                                    ->weight('bold'),
-                                                TextEntry::make('ms')
-                                                    ->getStateUsing(function ($record) use ($engMeasures) {
-
-                                                        $gim = $record->gim;
-
-                                                        $ms = ((769.7 + (56.69 * $gim)) / 100) - 5;
-                                                        return number_format($ms, 1);
-                                                    })
-                                                    ->label('Marbling Score')
-                                                    ->size('lg')
-                                                    ->weight('bold'),
-                                        
-                                                ])
-                                        ])
+                                        ]),
                                     ]),
                             ])->from('lg'),
                         ]),

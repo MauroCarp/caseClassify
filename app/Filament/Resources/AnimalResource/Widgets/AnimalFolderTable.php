@@ -55,9 +55,12 @@ class AnimalFolderTable extends BaseWidget
                     ->sortable()
                     ->searchable()
                     ->label('AoB'),
-                Tables\Columns\TextColumn::make('case')
+                Tables\Columns\TextColumn::make('gim')
                     ->sortable()
                     ->searchable()
+                    ->label('%G.I.M'),
+                Tables\Columns\TextColumn::make('case')
+                    ->sortable()
                     ->label('Carcasa')
                     ->getStateUsing(function ($record) {
 
@@ -67,7 +70,6 @@ class AnimalFolderTable extends BaseWidget
                     }),
                 Tables\Columns\TextColumn::make('sold')
                     ->sortable()
-                    ->searchable()
                     ->label('Estado')
                     ->badge()
                     ->colors([
@@ -90,7 +92,6 @@ class AnimalFolderTable extends BaseWidget
                 Tables\Columns\TextColumn::make('im')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable()
-                    ->searchable()
                     ->label('I.M')
                     ->getStateUsing(function ($record) {
 
@@ -101,7 +102,6 @@ class AnimalFolderTable extends BaseWidget
                 Tables\Columns\TextColumn::make('yg')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable()
-                    ->searchable()
                     ->label('Yield Grade')
                     ->getStateUsing(function ($record) use ($engMeasures) {
 
@@ -120,7 +120,6 @@ class AnimalFolderTable extends BaseWidget
                 Tables\Columns\TextColumn::make('rc')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable()
-                    ->searchable()
                     ->label('% R.C')
                     ->getStateUsing(function ($record) use ($engMeasures) {
 
@@ -137,7 +136,6 @@ class AnimalFolderTable extends BaseWidget
 
                 }),
                 Tables\Columns\TextColumn::make('grade')
-                    ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable()
                     ->searchable()
                     ->label('Grado')
@@ -149,7 +147,6 @@ class AnimalFolderTable extends BaseWidget
 
                 }),
                 ImageColumn::make('gradeImage')
-                ->toggleable(isToggledHiddenByDefault: true)
                 ->getStateUsing(function ($record) {
 
                     $gim = $record->gim;
@@ -165,25 +162,24 @@ class AnimalFolderTable extends BaseWidget
 
                 Tables\Actions\ViewAction::make()
                 ->color('primary')
-                ->slideOver()
                 ->infolist([
                     InfolistSection::make()
                         ->schema([
                             Split::make([
-                                Grid::make(3)
+                                Grid::make(4)
                                     ->schema([
                                         Group::make([
                                             TextEntry::make('category')
                                                 ->label('Categoria')
                                                 ->size('lg')
                                                 ->weight('bold'),                            
-                                            TextEntry::make('weight')
-                                                ->label('Peso')
+                                            TextEntry::make('gim')
+                                                ->label('Grasa Intramuscular')
                                                 ->size('lg')
                                                 ->weight('bold')
                                                 ->getStateUsing(function ($record) {
                         
-                                                    return $record->weight . ' Kg';
+                                                    return $record->gim . ' %';
                                                     
                                                 }),                           
                                                 TextEntry::make('AoB')
@@ -212,7 +208,7 @@ class AnimalFolderTable extends BaseWidget
                                                 ->label('RFID')
                                                 ->weight('bold'),
                                             TextEntry::make('gd')
-                                                ->label('G.D')
+                                                ->label('Grasa Dorsal')
                                                 ->size('lg')
                                                 ->weight('bold'),
                                             TextEntry::make('case')
@@ -222,7 +218,7 @@ class AnimalFolderTable extends BaseWidget
                                                 ->getStateUsing(function ($record) {
                         
                                                     $case = $record->weight * 0.59; 
-                                                    return number_format($case, 0);
+                                                    return number_format($case, 0) . ' Kg';
 
                                                 }),
                                             TextEntry::make('yg')
@@ -245,14 +241,64 @@ class AnimalFolderTable extends BaseWidget
                                                 }),
                                         ]),
                                         Group::make([
+                                            TextEntry::make('weight')
+                                                ->label('Peso')
+                                                ->size('lg')
+                                                ->weight('bold')
+                                                ->getStateUsing(function ($record) {
+                        
+                                                    return $record->weight . ' Kg';
+                                                    
+                                                }), 
+                                            TextEntry::make('AoB')
+                                                ->label('Area Ojo de Bife')
+                                                ->size('lg')
+                                                ->weight('bold')
+                                                ->getStateUsing(function ($record) {
+                        
+                                                    return $record->AoB . ' cm²';
+                                                    
+                                                }),  
+                                            TextEntry::make('rc')
+                                                ->getStateUsing(function ($record) use ($engMeasures) {
+
+                                                    $case = $record->weight * 0.59; 
+                            
+                                                    $n1 = $record->gd * $engMeasures['inch'];
+                                                    $n2 = $engMeasures['kph%'];
+                                                    $n3 = $case * $engMeasures['libras'];
+                                                    $n4 = $record->AoB * $engMeasures['inch2'];
+                            
+                                                    $rc = 65.59-(9.93*$n1)-(1.29*$n2)+(1.23*$n4)-(0.013*$n3); 
+                            
+                                                    return number_format($rc, 2);
+                                                })
+                                                ->label('% R.C')
+                                                ->size('lg')
+                                                ->weight('bold'),
+                                            TextEntry::make('ms')
+                                                ->getStateUsing(function ($record) use ($engMeasures) {
+
+                                                    $gim = $record->gim;
+
+                                                    $ms = ((769.7 + (56.69 * $gim)) / 100) - 5;
+                                                    return number_format($ms, 1);
+                                                })
+                                                ->label('Marbling Score')
+                                                ->size('lg')
+                                                ->weight('bold'), 
+                                            ]),
+                                        Group::make([
                                             TextEntry::make('grade')
                                                 ->getStateUsing(function ($record) {
                         
                                                     $gim = $record->gim;
                                                     $grade = AnimalResource::getGrade($gim,'grade');
                                                     $name = AnimalResource::getGrade($gim,'name');
+                                                    $quality = AnimalResource::getGrade($gim,'quality');
+                
+                                                    return $grade . ' - ' . $name . ' (' . $quality . ')';
                         
-                                                    return $grade . ' - ' . $name;
                                                 })
                                                 ->label('Grado')
                                                 ->size('lg')
@@ -275,39 +321,7 @@ class AnimalFolderTable extends BaseWidget
                         
                                                     return $gradeImage;
                                                 }),
-                                            Grid::make(2)
-                                                ->schema([
-                                                TextEntry::make('rc')
-                                                    ->getStateUsing(function ($record) use ($engMeasures) {
-
-                                                        $case = $record->weight * 0.59; 
-                                
-                                                        $n1 = $record->gd * $engMeasures['inch'];
-                                                        $n2 = $engMeasures['kph%'];
-                                                        $n3 = $case * $engMeasures['libras'];
-                                                        $n4 = $record->AoB * $engMeasures['inch2'];
-                                
-                                                        $rc = 65.59-(9.93*$n1)-(1.29*$n2)+(1.23*$n4)-(0.013*$n3); 
-                                
-                                                        return number_format($rc, 2);
-                                                    })
-                                                    ->label('% R.C')
-                                                    ->size('lg')
-                                                    ->weight('bold'),
-                                                TextEntry::make('ms')
-                                                    ->getStateUsing(function ($record) use ($engMeasures) {
-
-                                                        $gim = $record->gim;
-
-                                                        $ms = ((769.7 + (56.69 * $gim)) / 100) - 5;
-                                                        return number_format($ms, 1);
-                                                    })
-                                                    ->label('Marbling Score')
-                                                    ->size('lg')
-                                                    ->weight('bold'),
-                                        
-                                                ])
-                                        ])
+                                        ]),
                                     ]),
                             ])->from('lg'),
                         ]),
@@ -340,62 +354,77 @@ class AnimalFolderTable extends BaseWidget
 
                             return false;
                             // Mensaje de éxito
+                        }),
+                        // ->success('Registros asignados a la carpeta exitosamente.')
+                    BulkAction::make('removePurchase')
+                        ->label('Disponible')
+                        ->icon('heroicon-o-inbox-arrow-down')
+                        ->requiresConfirmation()
+                        ->action(function (Collection $records, array $data) {
+
+                            foreach ($records as $record) {
+                                $record->sold = 0; 
+                                $record->save();
+                            }
+
+                            return false;
+                            // Mensaje de éxito
                         })
                         // ->success('Registros asignados a la carpeta exitosamente.')
                 ])
             ]);
     }
 
-    public static function getGrade($gim, $type): string
-    {
+    // public static function getGrade($gim, $type): string
+    // {
         
-        switch ($gim) {
-            case $gim > 6.5:
-                $grade = 6;
-                $name = 'Abundante';
-                break;
-            case ($gim > 5 && $gim <= 6.5):
-                $grade = 5;
-                $name = 'Moderado';
-                break;
+    //     switch ($gim) {
+    //         case $gim > 6.5:
+    //             $grade = 6;
+    //             $name = 'Abundante';
+    //             break;
+    //         case ($gim > 5 && $gim <= 6.5):
+    //             $grade = 5;
+    //             $name = 'Moderado';
+    //             break;
             
-            case ($gim > 4 && $gim <= 5):
-                $grade = 4;
-                $name = 'Modesto';
-                break;
+    //         case ($gim > 4 && $gim <= 5):
+    //             $grade = 4;
+    //             $name = 'Modesto';
+    //             break;
             
-            case ($gim > 3 && $gim <= 4):
-                $grade = 3;
-                $name = 'Escaso';
-                break;
+    //         case ($gim > 3 && $gim <= 4):
+    //             $grade = 3;
+    //             $name = 'Escaso';
+    //             break;
             
-            case ($gim > 1.8 && $gim <= 3):
-                $grade = 2;
-                $name = 'Muy Escaso';
-                break;
+    //         case ($gim > 1.8 && $gim <= 3):
+    //             $grade = 2;
+    //             $name = 'Muy Escaso';
+    //             break;
 
-            case ($gim > 0.5 && $gim <= 1.8):
-                $grade = 1;
-                $name = 'Trazas';
-                break;
+    //         case ($gim > 0.5 && $gim <= 1.8):
+    //             $grade = 1;
+    //             $name = 'Trazas';
+    //             break;
 
-            case ($gim <= 0.5):
-                $grade = 0;
-                $name = 'Sin Grasa';
-                break;
+    //         case ($gim <= 0.5):
+    //             $grade = 0;
+    //             $name = 'Sin Grasa';
+    //             break;
             
-            default:
-                # code...
-                break;
-        }
+    //         default:
+    //             # code...
+    //             break;
+    //     }
 
-        if($type == 'grade'){
-            return $grade;
-        } else {
-            return $name;
-        }
+    //     if($type == 'grade'){
+    //         return $grade;
+    //     } else {
+    //         return $name;
+    //     }
 
-    }
+    // }
    
 
 }

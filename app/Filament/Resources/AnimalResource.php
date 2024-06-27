@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\AnimalResource\Pages;
 use App\Models\Animal;
 use App\Models\Folder;
+use App\Models\Raze;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -12,7 +13,6 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\ViewField;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\Section as InfolistSection;
 use Filament\Infolists\Components\Split;
@@ -22,9 +22,9 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Columns\ImageColumn;
-use Filament\Infolists\Components\SpatieMediaLibraryImageEntry;
+use Filament\Tables\Filters\Filter;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 
 class AnimalResource extends Resource
 {
@@ -50,24 +50,32 @@ class AnimalResource extends Resource
             'publish'
         ];
     }
-    
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Radio::make('category')
-                    ->label('Categoria')
-                    ->options([
-                        'Vaquillona' => 'Vaquillona',
-                        'Novillo' => 'Novillo',
-                    ])
-                    ->default('Vaquillona') // Establecer 'dorsal' como seleccionado por defecto
-                    ->required(),
+
                 Forms\Components\TextInput::make('rfid')
                     ->label('RFID')
                     ->required()
                     ->maxLength(191),
-                    Forms\Components\TextInput::make('weight')
+                Forms\Components\Select::make('raze')
+                    ->options(Raze::pluck('name', 'id')->toArray())
+                    ->label('Raza')
+                    ->searchable()
+                    ->preload()
+                    ->required()
+                    ->createOptionForm([
+                        Forms\Components\TextInput::make('name')
+                            ->label('Raza')
+                            ->required(),
+                    ])
+                    ->createOptionUsing(function (array $data): int {
+                        $raze = Raze::create(['name' => $data['name']]);
+                        return $raze->id;
+                    }),
+                Forms\Components\TextInput::make('weight')
                     ->label('Peso')
                     ->required()
                     ->maxLength(191),
@@ -83,6 +91,14 @@ class AnimalResource extends Resource
                     ->label('% GIM')
                     ->required()
                     ->maxLength(191),
+                Forms\Components\Radio::make('category')
+                    ->label('Categoria')
+                    ->options([
+                        'Vaquillona' => 'Vaquillona',
+                        'Novillo' => 'Novillo',
+                    ])
+                    ->default('Vaquillona') // Establecer 'dorsal' como seleccionado por defecto
+                    ->required(),
                 FileUpload::make('images')
                     ->label('Ecografias')
                     ->multiple()
@@ -120,7 +136,6 @@ class AnimalResource extends Resource
                     ->label('AoB'),
                 Tables\Columns\TextColumn::make('case')
                     ->sortable()
-                    ->searchable()
                     ->label('Carcasa')
                     ->getStateUsing(function ($record) {
 
@@ -128,7 +143,12 @@ class AnimalResource extends Resource
                         return number_format($case, 0);
 
                     }),
+                Tables\Columns\TextColumn::make('gim')
+                    ->sortable()
+                    ->searchable()
+                    ->label('% G.I.M'),
                 Tables\Columns\TextColumn::make('assigned')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->label('Asignado')
                     ->badge()
                     ->colors([
@@ -144,7 +164,6 @@ class AnimalResource extends Resource
                 Tables\Columns\TextColumn::make('im')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable()
-                    ->searchable()
                     ->label('I.M')
                     ->getStateUsing(function ($record) {
 
@@ -155,7 +174,6 @@ class AnimalResource extends Resource
                 Tables\Columns\TextColumn::make('yg')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable()
-                    ->searchable()
                     ->label('Yield Grade')
                     ->getStateUsing(function ($record) use ($engMeasures) {
 
@@ -173,8 +191,6 @@ class AnimalResource extends Resource
                     }),
                 Tables\Columns\TextColumn::make('rc')
                     ->toggleable(isToggledHiddenByDefault: true)
-                    ->sortable()
-                    ->searchable()
                     ->label('% R.C')
                     ->getStateUsing(function ($record) use ($engMeasures) {
 
@@ -191,23 +207,20 @@ class AnimalResource extends Resource
 
                 }),
                 Tables\Columns\TextColumn::make('grade')
-                    ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable()
-                    ->searchable()
                     ->label('Grado')
                     ->getStateUsing(function ($record){
 
-                        $grado = AnimalResource::getGrade($record->gim,'grade');
-                        $name = AnimalResource::getGrade($record->gim,'name');
+                        $grado = self::getGrade($record->gim,'grade');
+                        $name = self::getGrade($record->gim,'name');
                         return $grado . ' - ' . $name;
 
                 }),
                 ImageColumn::make('gradeImage')
-                ->toggleable(isToggledHiddenByDefault: true)
                 ->getStateUsing(function ($record) {
 
                     $gim = $record->gim;
-                    $name = AnimalResource::getGrade($gim,'name');
+                    $name = self::getGrade($gim,'name');
                     $name = strtolower(str_replace(' ','',$name));
                     $gradeImage = "marbling\/$name.png";
 
@@ -216,13 +229,41 @@ class AnimalResource extends Resource
                 ->label('Img Grado')
             ])
             ->filters([
-                //
+                Filter::make('grade')
+                   ->form([
+                    Forms\Components\Select::make('grade')
+                        ->label('Grado')
+                        ->multiple()
+                        ->options([
+                            '6' => '6 - Abundante',
+                            '5' => '5 - Moderado',
+                            '4' => '4 - Modesto',
+                            '3' => '3 - Escaso',
+                            '2' => '2 - Muy Escaso',
+                            '1' => '1 - Trazas',
+                            '0' => '0 - Sin Grasa',
+                        ])
+                        ->preload()
+                    ])
+                    ->query(function (Builder $query, array $data) {
+
+                        if (!empty($data['grade'])) {
+                            $gradeNumbers = array_keys($data['grade']);
+                            $query->where(function ($query) use ($gradeNumbers) {
+                                foreach ($gradeNumbers as $gradeNumber) {
+                                    $query->orWhere(function ($query) use ($gradeNumber) {
+                                        $query->whereRaw("grade = ?", [$gradeNumber]); // Replace `some_column` with the actual column name used in getGrade calculation
+                                    });
+                                }
+                            });
+                        }
+
+                    }),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()
                 ->color('primary')
-                ->modalHeading('Detalles del Animal')
-                ->slideOver(),
+                ->modalHeading('Detalles del Animal'),
                 Tables\Actions\EditAction::make()
             ])
             ->bulkActions([
@@ -262,20 +303,20 @@ class AnimalResource extends Resource
             InfolistSection::make()
                 ->schema([
                     Split::make([
-                        Grid::make(3)
+                        Grid::make(4)
                             ->schema([
                                 Group::make([
                                     TextEntry::make('category')
                                         ->label('Categoria')
                                         ->size('lg')
                                         ->weight('bold'),                            
-                                    TextEntry::make('weight')
-                                        ->label('Peso')
+                                    TextEntry::make('gim')
+                                        ->label('Grasa Intramuscular')
                                         ->size('lg')
                                         ->weight('bold')
                                         ->getStateUsing(function ($record) {
                 
-                                            return $record->weight . ' Kg';
+                                            return $record->gim . ' %';
                                             
                                         }),                           
                                         TextEntry::make('AoB')
@@ -304,7 +345,7 @@ class AnimalResource extends Resource
                                         ->label('RFID')
                                         ->weight('bold'),
                                     TextEntry::make('gd')
-                                        ->label('G.D')
+                                        ->label('Grasa Dorsal')
                                         ->size('lg')
                                         ->weight('bold'),
                                     TextEntry::make('case')
@@ -314,7 +355,7 @@ class AnimalResource extends Resource
                                         ->getStateUsing(function ($record) {
                 
                                             $case = $record->weight * 0.59; 
-                                            return number_format($case, 0);
+                                            return number_format($case, 0) . ' Kg';
 
                                         }),
                                     TextEntry::make('yg')
@@ -337,14 +378,63 @@ class AnimalResource extends Resource
                                         }),
                                 ]),
                                 Group::make([
+                                    TextEntry::make('weight')
+                                        ->label('Peso')
+                                        ->size('lg')
+                                        ->weight('bold')
+                                        ->getStateUsing(function ($record) {
+                
+                                            return $record->weight . ' Kg';
+                                            
+                                        }), 
+                                    TextEntry::make('AoB')
+                                        ->label('Area Ojo de Bife')
+                                        ->size('lg')
+                                        ->weight('bold')
+                                        ->getStateUsing(function ($record) {
+                
+                                            return $record->AoB . ' cm²';
+                                            
+                                        }),  
+                                    TextEntry::make('rc')
+                                        ->getStateUsing(function ($record) use ($engMeasures) {
+
+                                            $case = $record->weight * 0.59; 
+                    
+                                            $n1 = $record->gd * $engMeasures['inch'];
+                                            $n2 = $engMeasures['kph%'];
+                                            $n3 = $case * $engMeasures['libras'];
+                                            $n4 = $record->AoB * $engMeasures['inch2'];
+                    
+                                            $rc = 65.59-(9.93*$n1)-(1.29*$n2)+(1.23*$n4)-(0.013*$n3); 
+                    
+                                            return number_format($rc, 2);
+                                        })
+                                        ->label('% R.C')
+                                        ->size('lg')
+                                        ->weight('bold'),
+                                    TextEntry::make('ms')
+                                        ->getStateUsing(function ($record) use ($engMeasures) {
+
+                                            $gim = $record->gim;
+
+                                            $ms = ((769.7 + (56.69 * $gim)) / 100) - 5;
+                                            return number_format($ms, 1);
+                                        })
+                                        ->label('Marbling Score')
+                                        ->size('lg')
+                                        ->weight('bold'), 
+                                    ]),
+                                Group::make([
                                     TextEntry::make('grade')
                                         ->getStateUsing(function ($record) {
                 
                                             $gim = $record->gim;
-                                            $grade = AnimalResource::getGrade($gim,'grade');
-                                            $name = AnimalResource::getGrade($gim,'name');
+                                            $grade = self::getGrade($gim,'grade');
+                                            $name = self::getGrade($gim,'name');
+                                            $quality = self::getGrade($gim,'quality');
                 
-                                            return $grade . ' - ' . $name;
+                                            return $grade . ' - ' . $name . ' (' . $quality . ')';
                                         })
                                         ->label('Grado')
                                         ->size('lg')
@@ -361,45 +451,13 @@ class AnimalResource extends Resource
                                         ->getStateUsing(function ($record) {
                 
                                             $gim = $record->gim;
-                                            $name = AnimalResource::getGrade($gim,'name');
+                                            $name = self::getGrade($gim,'name');
                                             $name = strtolower(str_replace(' ','',$name));
                                             $gradeImage = "marbling\/$name.png";
                 
                                             return $gradeImage;
                                         }),
-                                    Grid::make(2)
-                                        ->schema([
-                                        TextEntry::make('rc')
-                                            ->getStateUsing(function ($record) use ($engMeasures) {
-
-                                                $case = $record->weight * 0.59; 
-                        
-                                                $n1 = $record->gd * $engMeasures['inch'];
-                                                $n2 = $engMeasures['kph%'];
-                                                $n3 = $case * $engMeasures['libras'];
-                                                $n4 = $record->AoB * $engMeasures['inch2'];
-                        
-                                                $rc = 65.59-(9.93*$n1)-(1.29*$n2)+(1.23*$n4)-(0.013*$n3); 
-                        
-                                                return number_format($rc, 2);
-                                            })
-                                            ->label('% R.C')
-                                            ->size('lg')
-                                            ->weight('bold'),
-                                        TextEntry::make('ms')
-                                            ->getStateUsing(function ($record) use ($engMeasures) {
-
-                                                $gim = $record->gim;
-
-                                                $ms = ((769.7 + (56.69 * $gim)) / 100) - 5;
-                                                return number_format($ms, 1);
-                                            })
-                                            ->label('Marbling Score')
-                                            ->size('lg')
-                                            ->weight('bold'),
-                                
-                                        ])
-                                ])
+                                ]),
                             ]),
                     ])->from('lg'),
                 ]),
@@ -432,35 +490,48 @@ class AnimalResource extends Resource
             case $gim > 6.5:
                 $grade = 6;
                 $name = 'Abundante';
+                $quality = 'Prime';
                 break;
             case ($gim > 5 && $gim <= 6.5):
                 $grade = 5;
                 $name = 'Moderado';
+                $quality = 'Prime';
+
                 break;
             
             case ($gim > 4 && $gim <= 5):
                 $grade = 4;
                 $name = 'Modesto';
+                $quality = 'Choice';
+
                 break;
             
             case ($gim > 3 && $gim <= 4):
                 $grade = 3;
                 $name = 'Escaso';
+                $quality = 'Choice';
+
                 break;
             
             case ($gim > 1.8 && $gim <= 3):
                 $grade = 2;
                 $name = 'Muy Escaso';
+                $quality = 'Choice';
+
                 break;
 
             case ($gim > 0.5 && $gim <= 1.8):
                 $grade = 1;
                 $name = 'Trazas';
+                $quality = 'Select';
+
                 break;
 
             case ($gim <= 0.5):
                 $grade = 0;
                 $name = 'Sin Grasa';
+                $quality = 'Select';
+
                 break;
             
             default:
@@ -470,6 +541,8 @@ class AnimalResource extends Resource
 
         if($type == 'grade'){
             return $grade;
+        } else if($type == 'quality'){
+            return $quality;
         } else {
             return $name;
         }

@@ -29,14 +29,17 @@ CREATE TABLE `animals` (
   `weight` float NOT NULL,
   `gd` float NOT NULL,
   `AoB` float NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
   `idFolder` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `gim` float DEFAULT NULL,
   `images` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `sold` tinyint(1) DEFAULT '0',
+  `raze` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `isAngus` tinyint(1) DEFAULT '0',
+  `isHilton` tinyint(1) DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -46,7 +49,8 @@ CREATE TABLE `animals` (
 LOCK TABLES `animals` WRITE;
 /*!40000 ALTER TABLE `animals` DISABLE KEYS */;
 INSERT INTO `animals` VALUES
-(13,'23123123','Vaquillona',333,17,44,'2024-06-22 03:29:21','2024-06-25 02:47:02','1',7,'[\"uploads\\/animals\\/01J0YNJ0A2RMS9ZY4A5QGYXQB1.jpg\",\"uploads\\/animals\\/01J0YNJ0A9KG3KGVAAYDMMDX0S.jpg\"]',1);
+(13,'23123123','Vaquillona',333,17,44,'3',7,'[\"uploads\\/animals\\/01J0YNJ0A2RMS9ZY4A5QGYXQB1.jpg\"]',1,'2',1,1,'2024-06-22 03:29:21','2024-07-01 04:18:30'),
+(14,'123123','Vaquillona',400,1,54,NULL,1,'[\"uploads\\/animals\\/01J1BHMP5CVGPTJ77AZ3YAY5Q7.jpg\"]',0,'2',0,0,'2024-06-27 03:31:02','2024-06-27 03:31:02');
 /*!40000 ALTER TABLE `animals` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -94,7 +98,7 @@ CREATE TABLE `folders` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -105,7 +109,8 @@ LOCK TABLES `folders` WRITE;
 /*!40000 ALTER TABLE `folders` DISABLE KEYS */;
 INSERT INTO `folders` VALUES
 (1,'Vaquillonas MB',5,'2024-09-27 00:00:00','2024-06-22 05:59:48','2024-06-22 05:59:48'),
-(2,'Novillos y Vaquillonas',6,'2024-06-28 00:00:00','2024-06-22 06:00:28','2024-06-22 06:00:28');
+(2,'Novillos y Vaquillonas',6,'2024-06-28 00:00:00','2024-06-22 06:00:28','2024-06-22 06:00:28'),
+(3,'Carpeta 1',4,'2024-06-28 00:00:00','2024-06-26 00:03:32','2024-06-26 00:03:32');
 /*!40000 ALTER TABLE `folders` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -163,7 +168,7 @@ CREATE TABLE `migrations` (
   `migration` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `batch` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -180,7 +185,9 @@ INSERT INTO `migrations` VALUES
 (6,'2024_05_30_233633_create_animals_table',2),
 (9,'2024_06_11_161737_create_folders_table',3),
 (10,'2024_06_13_215656_create_media_table',4),
-(11,'2024_06_25_005220_create_permission_tables',5);
+(11,'2024_06_25_005220_create_permission_tables',5),
+(12,'2024_06_26_214404_create_razes_table',6),
+(13,'2024_06_26_214405_create_razes_table',7);
 /*!40000 ALTER TABLE `migrations` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -369,6 +376,35 @@ LOCK TABLES `personal_access_tokens` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `razes`
+--
+
+DROP TABLE IF EXISTS `razes`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `razes` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `razes`
+--
+
+LOCK TABLES `razes` WRITE;
+/*!40000 ALTER TABLE `razes` DISABLE KEYS */;
+INSERT INTO `razes` VALUES
+(1,'Hereford','2024-06-27 00:51:37','2024-06-27 00:51:37'),
+(2,'Aberdeen Angus','2024-06-27 00:51:49','2024-06-27 00:51:49'),
+(3,'Braford','2024-06-27 01:55:08','2024-06-27 01:55:08');
+/*!40000 ALTER TABLE `razes` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `role_has_permissions`
 --
 
@@ -544,7 +580,7 @@ CREATE TABLE `users` (
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
 INSERT INTO `users` VALUES
-(2,'admin','maurogt.dd@gmail.com',NULL,'$2y$10$fV8QiDesIE/GCYDuF5fo8uGjVs5AFRw7Bah0k2W7f06Xxd1vKu5Pe','GRYQkKJqlchQcnZSAgK7ReDdbj2U5OSLr0vqtMnKuCZKw76VsyEtSTtwulie',1,'2024-05-29 00:30:03','2024-05-29 00:30:03'),
+(2,'admin','maurogt.dd@gmail.com',NULL,'$2y$10$fV8QiDesIE/GCYDuF5fo8uGjVs5AFRw7Bah0k2W7f06Xxd1vKu5Pe','N7JSYz7iwGMWLFeGUPR50lklYFtpzmPp0IQAdHZPazrcIG9S8KLojiqwt7TC',1,'2024-05-29 00:30:03','2024-05-29 00:30:03'),
 (4,'Cliente 1','cliente@cliente1.com',NULL,'$2y$10$knhB402xiAdJ80OZUsqahu.GTe92/wRg/YK4APpkJdsx4teDaH0xS',NULL,0,'2024-06-22 05:58:38','2024-06-25 05:42:43'),
 (7,'Jorge','jorgecornale@barlovento.com',NULL,'$2y$10$qhncuxnFSj7wtLGmt/P0wemKfgalWTPKHghnptOMmp8pYYpUWhPke',NULL,0,'2024-06-25 05:18:52','2024-06-25 05:18:52');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
@@ -563,4 +599,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-06-24 23:59:48
+-- Dump completed on 2024-07-01  7:48:33

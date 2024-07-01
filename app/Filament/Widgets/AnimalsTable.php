@@ -20,9 +20,9 @@ use Illuminate\Database\Eloquent\Model;
 class AnimalsTable extends BaseWidget
 {
 
-    protected int | string | array $columnSpan = '1';
+    protected int | string | array $columnSpan = '2';
 
-    protected static ?int $sort = 2;
+    protected static ?int $sort = 1;
     protected static ?string $heading = 'Listado de animales';
 
 
@@ -33,91 +33,24 @@ class AnimalsTable extends BaseWidget
 
         return $table
             ->query(AnimalResource::getEloquentQuery())
-            ->defaultPaginationPageOption(10)
+            ->defaultPaginationPageOption(5)
             ->columns([
                 Tables\Columns\TextColumn::make('category')
                     ->sortable()
-                    ->searchable()
                     ->label('Categoria'),
                 Tables\Columns\TextColumn::make('rfid')
                     ->sortable()
-                    ->searchable()
                     ->label('RFID'),
                 Tables\Columns\TextColumn::make('weight')
                     ->sortable()
-                    ->searchable()
                     ->label('Peso'),
                 Tables\Columns\TextColumn::make('gd')
-                    ->searchable()
                     ->label('G.D'),
                 Tables\Columns\TextColumn::make('AoB')
                     ->sortable()
-                    ->searchable()
                     ->label('AoB'),
-                Tables\Columns\TextColumn::make('case')
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->sortable()
-                    ->searchable()
-                    ->label('Carcasa')
-                    ->getStateUsing(function ($record) {
-
-                        $case = $record->weight * 0.59; 
-                        return number_format($case, 0);
-
-                    }),
-                Tables\Columns\TextColumn::make('im')
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->sortable()
-                    ->searchable()
-                    ->label('I.M')
-                    ->getStateUsing(function ($record) {
-
-                        $indiceMuscularidad = ($record->AoB / $record->weight) * 100; 
-                        return number_format($indiceMuscularidad, 0);
-
-                    }),
-                Tables\Columns\TextColumn::make('yg')
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->sortable()
-                    ->searchable()
-                    ->label('Yield Grade')
-                    ->getStateUsing(function ($record) use ($engMeasures) {
-
-                        $case = $record->weight * 0.59; 
-
-                        $n1 = $record->gd * $engMeasures['inch'];
-                        $n2 = $engMeasures['kph%'];
-                        $n3 = $case * $engMeasures['libras'];
-                        $n4 = $record->AoB * $engMeasures['inch2'];
-            
-                        $yieldGrade = 2.5+(2.5*$n1)+(0.2*$n2)+(0.0038*$n3)-(0.32*$n4); 
-
-                        return number_format($yieldGrade, 1);
-
-                    }),
-                Tables\Columns\TextColumn::make('rc')
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->sortable()
-                    ->searchable()
-                    ->label('% R.C')
-                    ->getStateUsing(function ($record) use ($engMeasures) {
-
-                        $case = $record->weight * 0.59; 
-
-                        $n1 = $record->gd * $engMeasures['inch'];
-                        $n2 = $engMeasures['kph%'];
-                        $n3 = $case * $engMeasures['libras'];
-                        $n4 = $record->AoB * $engMeasures['inch2'];
-
-                        $rc = 65.59-(9.93*$n1)-(1.29*$n2)+(1.23*$n4)-(0.013*$n3); 
-
-                        return number_format($rc, 2);
-
-                }),
                 Tables\Columns\TextColumn::make('grade')
-                    ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable()
-                    ->searchable()
                     ->label('Grado')
                     ->getStateUsing(function ($record){
 
@@ -127,7 +60,6 @@ class AnimalsTable extends BaseWidget
 
                 }),
                 Tables\Columns\ImageColumn::make('gradeImage')
-                ->toggleable(isToggledHiddenByDefault: true)
                 ->getStateUsing(function ($record) {
 
                     $gim = $record->gim;
@@ -316,10 +248,9 @@ class AnimalsTable extends BaseWidget
                         
                                                     $gim = $record->gim;
                                                     $grade = AnimalResource::getGrade($gim,'grade');
-                                                    $name = AnimalResource::getGrade($gim,'name');
-                                                    $quality = AnimalResource::getGrade($gim,'quality');
-                
-                                                    return $grade . ' - ' . $name . ' (' . $quality . ')';
+                                                    $name = AnimalResource::getGrade($gim,'name');  
+                                                                 
+                                                    return $grade . ' - ' . $name;
                                                 })
                                                 ->label('Grado')
                                                 ->size('lg')

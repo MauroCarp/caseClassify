@@ -338,9 +338,8 @@ class AnimalFolderTable extends BaseWidget
                                                     $gim = $record->gim;
                                                     $grade = AnimalResource::getGrade($gim,'grade');
                                                     $name = AnimalResource::getGrade($gim,'name');
-                                                    $quality = AnimalResource::getGrade($gim,'quality');
                 
-                                                    return $grade . ' - ' . $name . ' (' . $quality . ')';
+                                                    return $grade . ' - ' . $name;
                         
                                                 })
                                                 ->label('Grado')

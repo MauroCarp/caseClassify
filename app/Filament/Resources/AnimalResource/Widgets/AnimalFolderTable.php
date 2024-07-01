@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Filament\Infolists\Components\Section as InfolistSection;
 use Filament\Infolists\Components\Split;
 use Filament\Infolists\Components\TextEntry;
-
+use Illuminate\Database\Eloquent\Model;
 
 class AnimalFolderTable extends BaseWidget
 {
@@ -147,16 +147,59 @@ class AnimalFolderTable extends BaseWidget
 
                 }),
                 ImageColumn::make('gradeImage')
-                ->getStateUsing(function ($record) {
+                    ->getStateUsing(function ($record) {
 
-                    $gim = $record->gim;
-                    $name = AnimalResource::getGrade($gim,'name');
-                    $name = strtolower(str_replace(' ','',$name));
-                    $gradeImage = "marbling\/$name.png";
+                        $gim = $record->gim;
+                        $name = AnimalResource::getGrade($gim,'name');
+                        $name = strtolower(str_replace(' ','',$name));
+                        $gradeImage = "marbling\/$name.png";
 
-                    return $gradeImage;
-                })
-                ->label('Img Grado')
+                        return $gradeImage;
+                    })
+                    ->label('Img Grado'),
+                ImageColumn::make('gradeMedal')
+                    ->getStateUsing(function ($record) {
+
+                        $gim = $record->gim;
+                        $medal = AnimalResource::getGrade($gim,'medal');
+                        $medalImage = "images\/$medal.png";
+
+                        return $medalImage;
+                    })
+                    ->label('')
+                    ->tooltip(function (Model $record){
+                        $gim = $record->gim;
+                        $medal = AnimalResource::getGrade($gim,'medal');
+                        return ucfirst($medal);
+                    }),
+                ImageColumn::make('isAngus')
+                    ->getStateUsing(function ($record) {
+
+                        $angusImage = '';
+
+                        if($record->isAngus)
+                            $angusImage = "images\angusLogo.png";
+
+                        return $angusImage;
+
+                    })
+                    ->label('')
+                    ->tooltip('Argentine Angus Beef'),
+                ImageColumn::make('isHilton')
+                    ->getStateUsing(function ($record) {
+
+                        $hiltonImage = '';
+
+                        if($record->isHilton)
+                            $hiltonImage = "images\/cuotaHilton.png";
+
+                        return $hiltonImage;
+                    })
+                    ->label('')
+                    ->tooltip('Cuota Hilton'),
+        
+
+
             ])
             ->actions([
 
@@ -321,6 +364,76 @@ class AnimalFolderTable extends BaseWidget
                         
                                                     return $gradeImage;
                                                 }),
+                                                Split::make([
+                                                    Grid::make(3)
+                                                        ->schema([
+                                                            ImageEntry::make('gradeMedal')
+                                                                ->hiddenLabel()  
+                                                                ->visibility('private')
+                                                                ->height(60)
+                                                                ->grow(false)
+                                                                ->extraImgAttributes([
+                                                                    'class' => 'mx-auto block',
+                                                                    'loading' => 'lazy',
+                                                                ])
+                                                                ->getStateUsing(function ($record) {
+                                        
+                                                                    $gim = $record->gim;
+                                                                    $medal = AnimalResource::getGrade($gim,'medal');
+                                                                    $gradeMedal = "images\/$medal.png";
+                                        
+                                                                    return $gradeMedal;
+                                                                })
+                                                                ->tooltip(function (Model $record){
+                                                                    $gim = $record->gim;
+                                                                    $medal = AnimalResource::getGrade($gim,'medal');
+                                                                    return ucfirst($medal);
+                                                                }),
+                                                            ImageEntry::make('isAngus')
+                                                                ->hiddenLabel()  
+                                                                ->visibility('private')
+                                                                ->height(85)
+                                                                ->grow(false)
+                                                                ->extraImgAttributes([
+                                                                    'class' => 'mx-auto block',
+                                                                    'loading' => 'lazy',
+                                                                ])
+                                                                ->getStateUsing(function ($record) {
+                                        
+                                                                    $isAngus = '';
+            
+                                                                    if($record->isAngus){
+                                                                        $isAngus = "images\aberdeenAngus.png";
+                                                                    }
+            
+                                                                    return $isAngus;
+                                        
+                                                                })
+                                                                ->tooltip('Argentine Angus Beef'),
+                                                            ImageEntry::make('isHilton')
+                                                                ->hiddenLabel()  
+                                                                ->visibility('private')
+                                                                ->height(35)
+                                                                ->grow(false)
+                                                                ->extraImgAttributes([
+                                                                    'class' => 'mx-auto block',
+                                                                    'loading' => 'lazy',
+                                                                ])
+                                                                ->getStateUsing(function ($record) {
+                                        
+                                                                    $isHilton = '';
+            
+                                                                    if($record->isHilton){
+                                                                        $isHilton = "images\cuotaHilton.png";
+                                                                    }
+            
+                                                                    return $isHilton;
+                                        
+                                                                })
+                                                                ->tooltip('Cuota Hilton'),  
+            
+                                                        ])
+                                                ])
                                         ]),
                                     ]),
                             ])->from('lg'),

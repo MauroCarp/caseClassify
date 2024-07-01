@@ -15,8 +15,7 @@ use Filament\Infolists\Components\Group;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Tables\Columns\ImageColumn;
-
-
+use Illuminate\Database\Eloquent\Model;
 
 class AnimalsTable extends BaseWidget
 {
@@ -138,7 +137,48 @@ class AnimalsTable extends BaseWidget
 
                     return $gradeImage;
                 })
-                ->label('Img Grado')
+                ->label('Img Grado'),
+                ImageColumn::make('gradeMedal')
+                    ->getStateUsing(function ($record) {
+
+                        $gim = $record->gim;
+                        $medal = AnimalResource::getGrade($gim,'medal');
+                        $medalImage = "images\/$medal.png";
+
+                        return $medalImage;
+                    })
+                    ->label('')
+                    ->tooltip(function (Model $record){
+                        $gim = $record->gim;
+                        $medal = AnimalResource::getGrade($gim,'medal');
+                        return ucfirst($medal);
+                    }),
+                ImageColumn::make('isAngus')
+                    ->getStateUsing(function ($record) {
+
+                        $angusImage = '';
+
+                        if($record->isAngus)
+                            $angusImage = "images\angusLogo.png";
+
+                        return $angusImage;
+
+                    })
+                    ->label('')
+                    ->tooltip('Argentine Angus Beef'),
+                ImageColumn::make('isHilton')
+                    ->getStateUsing(function ($record) {
+
+                        $hiltonImage = '';
+
+                        if($record->isHilton)
+                            $hiltonImage = "images\/cuotaHilton.png";
+
+                        return $hiltonImage;
+                    })
+                    ->label('')
+                    ->tooltip('Cuota Hilton'),
+            
             ])
             ->actions([
 
@@ -302,6 +342,77 @@ class AnimalsTable extends BaseWidget
                         
                                                     return $gradeImage;
                                                 }),
+                                                Split::make([
+                                                    Grid::make(3)
+                                                        ->schema([
+                                                            ImageEntry::make('gradeMedal')
+                                                                ->hiddenLabel()  
+                                                                ->visibility('private')
+                                                                ->height(60)
+                                                                ->grow(false)
+                                                                ->extraImgAttributes([
+                                                                    'class' => 'mx-auto block',
+                                                                    'loading' => 'lazy',
+                                                                ])
+                                                                ->getStateUsing(function ($record) {
+                                        
+                                                                    $gim = $record->gim;
+                                                                    $medal = AnimalResource::getGrade($gim,'medal');
+                                                                    $gradeMedal = "images\/$medal.png";
+                                        
+                                                                    return $gradeMedal;
+                                                                })
+                                                                ->tooltip(function (Model $record){
+                                                                    $gim = $record->gim;
+                                                                    $medal = AnimalResource::getGrade($gim,'medal');
+                                                                    return ucfirst($medal);
+                                                                }),
+                                                            ImageEntry::make('isAngus')
+                                                                ->hiddenLabel()  
+                                                                ->visibility('private')
+                                                                ->height(85)
+                                                                ->grow(false)
+                                                                ->extraImgAttributes([
+                                                                    'class' => 'mx-auto block',
+                                                                    'loading' => 'lazy',
+                                                                ])
+                                                                ->getStateUsing(function ($record) {
+                                        
+                                                                    $isAngus = '';
+            
+                                                                    if($record->isAngus){
+                                                                        $isAngus = "images\aberdeenAngus.png";
+                                                                    }
+            
+                                                                    return $isAngus;
+                                        
+                                                                })
+                                                                ->tooltip('Argentine Angus Beef'),
+                                                            ImageEntry::make('isHilton')
+                                                                ->hiddenLabel()  
+                                                                ->visibility('private')
+                                                                ->height(35)
+                                                                ->grow(false)
+                                                                ->extraImgAttributes([
+                                                                    'class' => 'mx-auto block',
+                                                                    'loading' => 'lazy',
+                                                                ])
+                                                                ->getStateUsing(function ($record) {
+                                        
+                                                                    $isHilton = '';
+            
+                                                                    if($record->isHilton){
+                                                                        $isHilton = "images\cuotaHilton.png";
+                                                                    }
+            
+                                                                    return $isHilton;
+                                        
+                                                                })
+                                                                ->tooltip('Cuota Hilton'),
+                                                                
+            
+                                                        ])
+                                                ])
                                         ]),
                                     ]),
                             ])->from('lg'),

@@ -22,10 +22,13 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Columns\ImageColumn;
-use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
+use Filament\Forms\Components\Grid as FormGrid;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Split as ComponentsSplit;
+use Illuminate\Database\Eloquent\Model;
 
 class AnimalResource extends Resource
 {
@@ -56,57 +59,104 @@ class AnimalResource extends Resource
     {
         return $form
             ->schema([
+                    Forms\Components\TextInput::make('rfid')
+                        ->label('RFID')
+                        ->required()
+                        ->maxLength(191),
+                    Forms\Components\Select::make('raze')
+                        ->options(Raze::pluck('name', 'id')->toArray())
+                        ->label('Raza')
+                        ->searchable()
+                        ->preload()
+                        ->required()
+                        ->createOptionForm([
+                            Forms\Components\TextInput::make('name')
+                                ->label('Raza')
+                                ->required(),
+                        ])
+                        ->createOptionUsing(function (array $data): int {
+                            $raze = Raze::create(['name' => $data['name']]);
+                            return $raze->id;
+                        }),
 
-                Forms\Components\TextInput::make('rfid')
-                    ->label('RFID')
-                    ->required()
-                    ->maxLength(191),
-                Forms\Components\Select::make('raze')
-                    ->options(Raze::pluck('name', 'id')->toArray())
-                    ->label('Raza')
-                    ->searchable()
-                    ->preload()
-                    ->required()
-                    ->createOptionForm([
-                        Forms\Components\TextInput::make('name')
-                            ->label('Raza')
-                            ->required(),
-                    ])
-                    ->createOptionUsing(function (array $data): int {
-                        $raze = Raze::create(['name' => $data['name']]);
-                        return $raze->id;
-                    }),
-                Forms\Components\TextInput::make('weight')
-                    ->label('Peso')
-                    ->required()
-                    ->maxLength(191),
-                Forms\Components\TextInput::make('gd')
-                    ->label('G.D')
-                    ->required()
-                    ->maxLength(191),
-                Forms\Components\TextInput::make('AoB')
-                    ->label('AoB')
-                    ->required()
-                    ->maxLength(191),
-                Forms\Components\TextInput::make('gim')
-                    ->label('% GIM')
-                    ->required()
-                    ->maxLength(191),
-                Forms\Components\Radio::make('category')
-                    ->label('Categoria')
-                    ->options([
-                        'Vaquillona' => 'Vaquillona',
-                        'Novillo' => 'Novillo',
-                    ])
-                    ->default('Vaquillona') // Establecer 'dorsal' como seleccionado por defecto
-                    ->required(),
-                FileUpload::make('images')
-                    ->label('Ecografias')
-                    ->multiple()
-                    ->image()
-                    ->directory('uploads/animals')
-                    ->visibility('public')
-            ]);
+                    Forms\Components\TextInput::make('weight')
+                        ->label('Peso')
+                        ->required()
+                        ->maxLength(191),
+                    Forms\Components\TextInput::make('gd')
+                        ->label('G.D')
+                        ->required()
+                        ->maxLength(191),
+    
+                    Forms\Components\TextInput::make('AoB')
+                        ->label('AoB')
+                        ->required()
+                        ->maxLength(191),
+                    Forms\Components\TextInput::make('gim')
+                            ->label('% GIM')
+                            ->required()
+                            ->maxLength(191),
+    
+                    ComponentsSplit::make([
+                        FormGrid::make(2)
+                        ->schema([
+                            Forms\Components\Radio::make('category')
+                                ->label('Categoria')
+                                ->options([
+                                    'Vaquillona' => 'Vaquillona',
+                                    'Novillo' => 'Novillo',
+                                ])
+                                ->default('Vaquillona')
+                                ->required(),
+                                ComponentsSplit::make([
+                                FormGrid::make(1)
+                                ->schema([
+                                    Forms\Components\Toggle::make('isAngus')
+                                        ->label('Argentine Angus Beef'),
+                                    Forms\Components\Toggle::make('isHilton')
+                                        ->label('Cuota Hilton'),
+                                ])
+                            ]),
+                            ])
+                        ]),
+                        FileUpload::make('images')
+                            ->label('Ecografias')
+                            ->multiple()
+                            ->image()
+                            ->directory('uploads/animals')
+                            ->visibility('public'),                      
+
+
+                // FormGrid::make(4)
+                //     ->schema([
+                //         FormGrid::make(3)
+                //             ->schema([
+                //                 Forms\Components\Radio::make('category')
+                //                     ->label('Categoria')
+                //                     ->options([
+                //                         'Vaquillona' => 'Vaquillona',
+                //                         'Novillo' => 'Novillo',
+                //                     ])
+                //                     ->default('Vaquillona')
+                //                     ->required(),
+                //                 Forms\Components\Toggle::make('isAngus')
+                //                     ->label('Aberdeen Angus'),
+                //                 Forms\Components\Toggle::make('isHilton')
+                //                     ->label('Cuota Hilton'),
+
+                //             ]),
+                //         FormGrid::make(1)
+                //             ->schema([
+                //                 FileUpload::make('images')
+                //                     ->label('Ecografias')
+                //                     ->multiple()
+                //                     ->image()
+                //                     ->directory('uploads/animals')
+                //                     ->visibility('public')
+                //             ]),
+
+                //     ])
+        ]);
     }
 
     public static function table(Table $table): Table
@@ -212,16 +262,56 @@ class AnimalResource extends Resource
 
                 }),
                 ImageColumn::make('gradeImage')
-                ->getStateUsing(function ($record) {
+                    ->getStateUsing(function ($record) {
 
-                    $gim = $record->gim;
-                    $name = self::getGrade($gim,'name');
-                    $name = strtolower(str_replace(' ','',$name));
-                    $gradeImage = "marbling\/$name.png";
+                        $gim = $record->gim;
+                        $name = self::getGrade($gim,'name');
+                        $name = strtolower(str_replace(' ','',$name));
+                        $gradeImage = "marbling\/$name.png";
 
-                    return $gradeImage;
-                })
-                ->label('Img Grado')
+                        return $gradeImage;
+                    })
+                    ->label('Img Grado'),
+                ImageColumn::make('gradeMedal')
+                    ->getStateUsing(function ($record) {
+
+                        $gim = $record->gim;
+                        $medal = self::getGrade($gim,'medal');
+                        $medalImage = "images\/$medal.png";
+
+                        return $medalImage;
+                    })
+                    ->label('')
+                    ->tooltip(function (Model $record){
+                        $gim = $record->gim;
+                        $medal = self::getGrade($gim,'medal');
+                        return ucfirst($medal);
+                    }),
+                ImageColumn::make('isAngus')
+                    ->getStateUsing(function ($record) {
+
+                        $angusImage = '';
+
+                        if($record->isAngus)
+                            $angusImage = "images\angusLogo.png";
+
+                        return $angusImage;
+
+                    })
+                    ->label('')
+                    ->tooltip('Argentine Angus Beef'),
+                ImageColumn::make('isHilton')
+                    ->getStateUsing(function ($record) {
+
+                        $hiltonImage = '';
+
+                        if($record->isHilton)
+                            $hiltonImage = "images\/cuotaHilton.png";
+
+                        return $hiltonImage;
+                    })
+                    ->label('')
+                    ->tooltip('Cuota Hilton'),
             ])
             ->filters([
                 SelectFilter::make('category')
@@ -229,7 +319,8 @@ class AnimalResource extends Resource
                     ->options([
                         'Vaquillona' => 'Vaquillona',
                         'Novillo' => 'Novillo',
-                    ]),
+                    ])
+                    ->preload(),
                 SelectFilter::make('grade')
                     ->label('Grado')
                     ->options([
@@ -241,6 +332,42 @@ class AnimalResource extends Resource
                         '1 - Trazas' => '1 - Trazas',
                         '0 - Sin Grasa' => '0 - Sin Grasa',
                     ])
+                    ->query(function ($query, array $data) {
+                        
+                        switch ($data['value']) {
+                            case '6 - Abundante':
+                                $calc = "gim > 6.5";
+                                break;
+                            case '5 - Modesto':
+                                $calc = "gim > 5 ANDgim<= 6.5";
+                                break;
+                            case '4 - Moderado':
+                                $calc = "gim > 4 AND gim <= 5";
+                                break;
+                            case '3 - Escaso':
+                                $calc = "gim> 3 AND gim <= 4";
+                                break;
+                            case '2 - Muy Escaso':
+                                $calc = "gim 1.8 AND gim <= 3";
+                                break;
+                            case '1 - Trazas':
+                                $calc = "gim > 0.5 AND gim <= 1.8";
+                                break;
+                            case '0 - Sin Grasa':
+                                $calc = "gim <= 0.5";
+                                break;
+                            
+                            default:
+                                $calc = "gim BETWEEN 0 AND 7";
+                            break;
+                        }
+
+                        $a =  DB::select('select gim from animals where '. $calc);
+                        return $a;
+
+                    })  
+                    ->preload(),
+               
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()
@@ -414,9 +541,8 @@ class AnimalResource extends Resource
                                             $gim = $record->gim;
                                             $grade = self::getGrade($gim,'grade');
                                             $name = self::getGrade($gim,'name');
-                                            $quality = self::getGrade($gim,'quality');
                 
-                                            return $grade . ' - ' . $name . ' (' . $quality . ')';
+                                            return $grade . ' - ' . $name;
                                         })
                                         ->label('Grado')
                                         ->size('lg')
@@ -439,6 +565,78 @@ class AnimalResource extends Resource
                 
                                             return $gradeImage;
                                         }),
+                                    Split::make([
+                                        Grid::make(3)
+                                            ->schema([
+                                                ImageEntry::make('gradeMedal')
+                                                    ->hiddenLabel()  
+                                                    ->visibility('private')
+                                                    ->height(60)
+                                                    ->grow(false)
+                                                    ->extraImgAttributes([
+                                                        'class' => 'mx-auto block',
+                                                        'loading' => 'lazy',
+                                                    ])
+                                                    ->getStateUsing(function ($record) {
+                            
+                                                        $gim = $record->gim;
+                                                        $medal = self::getGrade($gim,'medal');
+                                                        $gradeMedal = "images\/$medal.png";
+                            
+                                                        return $gradeMedal;
+                                                    })
+                                                    ->tooltip(function (Model $record){
+                                                        $gim = $record->gim;
+                                                        $medal = self::getGrade($gim,'medal');
+                                                        return ucfirst($medal);
+                                                    }),
+                                                ImageEntry::make('isAngus')
+                                                    ->hiddenLabel()  
+                                                    ->visibility('private')
+                                                    ->height(85)
+                                                    ->grow(false)
+                                                    ->extraImgAttributes([
+                                                        'class' => 'mx-auto block',
+                                                        'loading' => 'lazy',
+                                                    ])
+                                                    ->getStateUsing(function ($record) {
+                            
+                                                        $isAngus = '';
+
+                                                        if($record->isAngus){
+                                                            $isAngus = "images\aberdeenAngus.png";
+                                                        }
+
+                                                        return $isAngus;
+                            
+                                                    })
+                                                    ->tooltip('Argentine Angus Beef'),
+                                                ImageEntry::make('isHilton')
+                                                    ->hiddenLabel()  
+                                                    ->visibility('private')
+                                                    ->height(35)
+                                                    ->grow(false)
+                                                    ->extraImgAttributes([
+                                                        'class' => 'mx-auto block',
+                                                        'loading' => 'lazy',
+                                                    ])
+                                                    ->getStateUsing(function ($record) {
+                            
+                                                        $isHilton = '';
+
+                                                        if($record->isHilton){
+                                                            $isHilton = "images\cuotaHilton.png";
+                                                        }
+
+                                                        return $isHilton;
+                            
+                                                    })
+                                                    ->tooltip('Cuota Hilton'),
+                                                    
+
+                                            ])
+                                    ])
+                                    
                                 ]),
                             ]),
                     ])->from('lg'),
@@ -473,11 +671,13 @@ class AnimalResource extends Resource
                 $grade = 6;
                 $name = 'Abundante';
                 $quality = 'Prime';
+                $medal = 'platinium';
                 break;
             case ($gim > 5 && $gim <= 6.5):
                 $grade = 5;
                 $name = 'Moderado';
                 $quality = 'Prime';
+                $medal = 'platinium';
 
                 break;
             
@@ -485,6 +685,7 @@ class AnimalResource extends Resource
                 $grade = 4;
                 $name = 'Modesto';
                 $quality = 'Choice';
+                $medal = 'gold';
 
                 break;
             
@@ -492,6 +693,7 @@ class AnimalResource extends Resource
                 $grade = 3;
                 $name = 'Escaso';
                 $quality = 'Choice';
+                $medal = 'gold';
 
                 break;
             
@@ -499,6 +701,7 @@ class AnimalResource extends Resource
                 $grade = 2;
                 $name = 'Muy Escaso';
                 $quality = 'Choice';
+                $medal = 'gold';
 
                 break;
 
@@ -506,6 +709,7 @@ class AnimalResource extends Resource
                 $grade = 1;
                 $name = 'Trazas';
                 $quality = 'Select';
+                $medal = 'silver';
 
                 break;
 
@@ -513,6 +717,7 @@ class AnimalResource extends Resource
                 $grade = 0;
                 $name = 'Sin Grasa';
                 $quality = 'Select';
+                $medal = 'silver';
 
                 break;
             
@@ -525,6 +730,8 @@ class AnimalResource extends Resource
             return $grade;
         } else if($type == 'quality'){
             return $quality;
+        } else if($type == 'medal'){
+            return $medal;
         } else {
             return $name;
         }

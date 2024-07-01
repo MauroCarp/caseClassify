@@ -1,0 +1,12 @@
+.filament-sidebar {
+    width: 150px; /* Cambia este valor al ancho deseado */
+}
+
+.filament-main {
+    margin-left: 150; /* Asegúrate de que este valor coincida con el ancho de la barra lateral */
+}
+
+/* Ajustar el contenido principal para compensar el nuevo ancho del menú */
+.filament-main {
+    padding-left: 1rem; /* Ajusta este valor según sea necesario */
+}

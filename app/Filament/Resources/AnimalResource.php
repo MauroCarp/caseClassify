@@ -170,7 +170,6 @@ class AnimalResource extends Resource
                     ->sortable()
                     ->label('Categoria'),
                 Tables\Columns\TextColumn::make('rfid')
-                    ->sortable()
                     ->label('RFID'),
                 Tables\Columns\TextColumn::make('weight')
                     ->sortable()
@@ -252,7 +251,6 @@ class AnimalResource extends Resource
 
                 }),
                 Tables\Columns\TextColumn::make('grade')
-                    ->sortable()
                     ->label('Grado')
                     ->getStateUsing(function ($record){
 
@@ -271,7 +269,7 @@ class AnimalResource extends Resource
 
                         return $gradeImage;
                     })
-                    ->label('Img Grado'),
+                    ->label(''),
                 ImageColumn::make('gradeMedal')
                     ->getStateUsing(function ($record) {
 

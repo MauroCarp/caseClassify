@@ -67,11 +67,11 @@
     </style>
 
 <div class="contenedor">
-    <img src="storage/images/logo-back.png" style="margin:0 auto;width:100%;position:absolute;z-index:0;top:25%">
+    <img src="storage/images/fapabe-isologo.png" style="margin:0 auto;width:50%;position:absolute;z-index:0;top:25%;opacity:0.06">
 
     <div class="header">
+        <img src="storage/images/fapabe.png" alt="Logo" style="float:right">
         <h1>Resúmen de compra</h1>
-        <img src="storage/images/barlovento-logo.png" alt="Logo" style="float:right">
     </div>
 
     <div class="container">

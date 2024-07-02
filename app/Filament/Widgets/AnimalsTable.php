@@ -363,5 +363,10 @@ class AnimalsTable extends BaseWidget
                 ])
             ]);
     }
+
+    public static function canViewAny(): bool
+    {
+        return Filament::auth()->user()->hasRole(['super_admin','admin']    );
+    }
 }
 

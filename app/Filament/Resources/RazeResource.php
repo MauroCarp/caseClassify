@@ -13,6 +13,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Facades\Filament;
 
 class RazeResource extends Resource
 {
@@ -73,6 +74,11 @@ class RazeResource extends Resource
         return [
             //
         ];
+    }
+
+    public static function canViewAny(): bool
+    {
+        return Filament::auth()->user()->hasRole(['super_admin','admin']    );
     }
 
     public static function getPages(): array

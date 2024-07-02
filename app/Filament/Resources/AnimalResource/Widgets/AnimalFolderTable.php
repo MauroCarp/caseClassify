@@ -37,30 +37,20 @@ class AnimalFolderTable extends BaseWidget
             ->defaultPaginationPageOption(10)
             ->columns([
                 Tables\Columns\TextColumn::make('category')
-                    ->sortable()
-                    ->searchable()
                     ->label('Categoria'),
                 Tables\Columns\TextColumn::make('rfid')
-                    ->sortable()
-                    ->searchable()
                     ->label('RFID'),
                 Tables\Columns\TextColumn::make('weight')
                     ->sortable()
-                    ->searchable()
                     ->label('Peso'),
                 Tables\Columns\TextColumn::make('gd')
-                    ->searchable()
                     ->label('G.D'),
                 Tables\Columns\TextColumn::make('AoB')
                     ->sortable()
-                    ->searchable()
                     ->label('AoB'),
                 Tables\Columns\TextColumn::make('gim')
-                    ->sortable()
-                    ->searchable()
                     ->label('%G.I.M'),
                 Tables\Columns\TextColumn::make('case')
-                    ->sortable()
                     ->label('Carcasa')
                     ->getStateUsing(function ($record) {
 
@@ -91,7 +81,6 @@ class AnimalFolderTable extends BaseWidget
                     
                 Tables\Columns\TextColumn::make('im')
                     ->toggleable(isToggledHiddenByDefault: true)
-                    ->sortable()
                     ->label('I.M')
                     ->getStateUsing(function ($record) {
 
@@ -101,7 +90,6 @@ class AnimalFolderTable extends BaseWidget
                     }),
                 Tables\Columns\TextColumn::make('yg')
                     ->toggleable(isToggledHiddenByDefault: true)
-                    ->sortable()
                     ->label('Yield Grade')
                     ->getStateUsing(function ($record) use ($engMeasures) {
 
@@ -119,7 +107,6 @@ class AnimalFolderTable extends BaseWidget
                     }),
                 Tables\Columns\TextColumn::make('rc')
                     ->toggleable(isToggledHiddenByDefault: true)
-                    ->sortable()
                     ->label('% R.C')
                     ->getStateUsing(function ($record) use ($engMeasures) {
 
@@ -136,8 +123,6 @@ class AnimalFolderTable extends BaseWidget
 
                 }),
                 Tables\Columns\TextColumn::make('grade')
-                    ->sortable()
-                    ->searchable()
                     ->label('Grado')
                     ->getStateUsing(function ($record){
 

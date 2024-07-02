@@ -32,9 +32,6 @@ class ViewFolder extends ViewRecord
         $record = $this->getRecord();
 
         return [
-            // AnimalFolderTable::class => [
-            //     'data'=>$record->id
-            // ],
             AnimalFolderTable::make([
                 'idFolder' => $record->id,
             ])

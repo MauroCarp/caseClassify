@@ -31,7 +31,9 @@ class DashboardPanelProvider extends PanelProvider
             ->defaultThemeMode(ThemeMode::Dark)
             ->brandName('CaseQuality')
             ->topNavigation()
-            ->brandLogo(asset('images/fapabe-menu.png'))
+            ->brandLogo(asset('images/fapabe.png'))
+            ->brandLogoHeight('4rem')
+            ->favicon(asset('images/favicon.png'))
             ->colors([
                 'primary' => Color::Amber,
             ])

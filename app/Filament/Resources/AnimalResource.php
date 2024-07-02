@@ -127,35 +127,6 @@ class AnimalResource extends Resource
                             ->visibility('public'),                      
 
 
-                // FormGrid::make(4)
-                //     ->schema([
-                //         FormGrid::make(3)
-                //             ->schema([
-                //                 Forms\Components\Radio::make('category')
-                //                     ->label('Categoria')
-                //                     ->options([
-                //                         'Vaquillona' => 'Vaquillona',
-                //                         'Novillo' => 'Novillo',
-                //                     ])
-                //                     ->default('Vaquillona')
-                //                     ->required(),
-                //                 Forms\Components\Toggle::make('isAngus')
-                //                     ->label('Aberdeen Angus'),
-                //                 Forms\Components\Toggle::make('isHilton')
-                //                     ->label('Cuota Hilton'),
-
-                //             ]),
-                //         FormGrid::make(1)
-                //             ->schema([
-                //                 FileUpload::make('images')
-                //                     ->label('Ecografias')
-                //                     ->multiple()
-                //                     ->image()
-                //                     ->directory('uploads/animals')
-                //                     ->visibility('public')
-                //             ]),
-
-                //     ])
         ]);
     }
 

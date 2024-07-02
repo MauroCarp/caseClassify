@@ -19,3 +19,4 @@ Route::get('/', function () {
 });
 
 Route::get('/pdf/generate/folder', [PdfController::class,'folderRecords'])->name('pdf.inform');
+Route::get('/record/{record}', [RecordController::class, 'show'])->name('ruta.view');

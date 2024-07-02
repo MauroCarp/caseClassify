@@ -18,8 +18,28 @@ class RazeResource extends Resource
 {
     protected static ?string $model = Raze::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    
+    protected static ?string $navigationIcon = 'heroicon-o-list-bullet';
 
+    protected static ?string $navigationLabel = 'Razas'; // Cambiar el texto en el menú de navegación
+
+    protected static ?string $pluralModelLabel = 'Razas';
+
+    protected static ?string $modelLabel = 'Raza';
+
+    public static function getPermissionPrefixes(): array
+    {
+        return [
+            'view',
+            'view_any',
+            'create',
+            'update',
+            'delete',
+            'delete_any',
+            'publish'
+        ];
+    }
+    
     public static function form(Form $form): Form
     {
         return $form

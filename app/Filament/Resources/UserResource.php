@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\RelationManagers;
+use Filament\Facades\Filament;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -49,6 +50,7 @@ class UserResource extends Resource
                     ->required(fn (string $operation): bool => $operation === 'create'),
 
                 Forms\Components\Select::make('roles')
+                    ->visible(fn () => Filament::auth()->user()->hasRole('super_admin'))
                     ->relationship('roles', 'name')
                     ->multiple()
                     ->preload()
